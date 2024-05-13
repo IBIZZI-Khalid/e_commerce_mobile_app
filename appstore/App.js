@@ -6,7 +6,10 @@ import {
 import { Image } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createStackNavigator } from '@react-navigation/stack';
+
 import Header from './components/Header.js';
+import Account from './components/Account.js';
 import Mainpage from './components/Mainpage.js';
 import * as React from 'react';
 
@@ -101,11 +104,8 @@ function MyTabBar({ state, descriptors, navigation }) {
       borderRadius:15,
       height : 90,
       ...styles.shadow
-       
-    
     }}
      >
-
       {state.routes.map((route, index) => {
 
         const { options } = descriptors[route.key];
@@ -163,13 +163,9 @@ function MyTabBar({ state, descriptors, navigation }) {
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
 
-export default function App() {
+function TabNavigator() {
   return (
-    <NavigationContainer >
-      
-      
       <Tab.Navigator 
-      
       tabBar={(props) => <MyTabBar {...props} />} 
       
       // tabBarOptions = {{
@@ -182,14 +178,11 @@ export default function App() {
       
       screenOptions={{  
         header: () => <Header />,
-        // headerShown: false
-        // tabBarShowLabel: false,
         // showLabel : false , //not working tho :(
-       
        }}
        style={styles.tabNavigator}
-      
       > 
+
         {/* {...props} is a spread operator that returns all th props it gets from Tab.navigator to  MyTabBar component */}
         
         <Tab.Screen name="Home" component={Mainpage}
@@ -303,10 +296,19 @@ export default function App() {
             </View>
           )
         }}/>
-
-
       </Tab.Navigator>
     
-    </NavigationContainer>
   );
+}
+
+export default function App(){
+  return(
+    <NavigationContainer>
+      <Stack.Navigator initialRouteName="Home">
+        <Stack.Screen name="Main" component={TabNavigator} options={{ headerShown: false }} />
+        <Stack.Screen name="Account" component={Account} />
+      </Stack.Navigator>
+    </NavigationContainer>
+    // react-navigation is used to manage and control the navigation between different screens in our app
+  )
 }

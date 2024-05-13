@@ -23,13 +23,17 @@ export const fetchProducts = async () => {
 
 
 export const login = async (username,password) =>{
-  const response = await axios.post(`${BASE_URL}api/accounts/login/`
-    ,{username, password})
-    return response.data 
-  
-    .catch(error =>{
-    setError(error.message);
-    })
+  try{
+    const response = await axios.post(`${BASE_URL}api/accounts/login/`
+      ,{username, password})
+      return response.data 
+    
+      .catch(error =>{
+      setError(error.message);
+      })
+  }catch(error){
+    console.log('error at the login function in Api.js',error.message)
+  }
 }
 
 
