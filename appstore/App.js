@@ -9,7 +9,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 
 import Header from './components/Header.js';
-import Account from './components/Account.js';
+import AccountNavigator from './components/Account.js';
 import Mainpage from './components/Mainpage.js';
 import * as React from 'react';
 
@@ -306,7 +306,8 @@ export default function App(){
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Home">
         <Stack.Screen name="Main" component={TabNavigator} options={{ headerShown: false }} />
-        <Stack.Screen name="Account" component={Account} />
+        <Stack.Screen name="Account" component={AccountNavigator}   options={{ headerShown: false }} 
+/>
       </Stack.Navigator>
     </NavigationContainer>
     // react-navigation is used to manage and control the navigation between different screens in our app

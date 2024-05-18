@@ -1,8 +1,10 @@
 import axios from 'axios';
 // const BASE_URL = 'http://127.0.0.1/'
 // const BASE_URL = 'http://10.0.2.2:8000/'
-//const BASE_URL = 'http://localhost:8000/';
-const BASE_URL = 'http://192.168.11.168:8000/';
+// const BASE_URL = 'http://localhost:8000/';
+// const BASE_URL = 'http://192.168.11.168:8000/';
+const BASE_URL = 'http://192.168.254.213:8000/'
+// const BASE_URL = 'http://192.168.0.100:8000/'
 // const BASE_URL = 'http://192.168.100.109:8000/';
 
 export const fetchProducts = async () => { 
@@ -18,42 +20,118 @@ export const fetchProducts = async () => {
     }).catch(error => {
       console.log(error);});   
   return response;  
-};
+    }
 
+const apiClient = axios.create({
+  baseURL: BASE_URL,
+  withCredentials: true,
+  headers: {
+    // 'X-CSRFToken': csrftoken ,
+  'Content-Type' : 'application/json',
+  },
+});
 
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export const login = async (username,password) =>{
-  try{
-    const response = await axios.post(`${BASE_URL}api/accounts/login/`
-      ,{username, password})
-      return response.data 
-    
-      .catch(error =>{
-      setError(error.message);
-      })
-  }catch(error){
-    console.log('error at the login function in Api.js',error.message)
-  }
-}
+    try{
+      console.log('testing login function...');
+      console.log('Sending login request with:', { username, password });
 
+      const response = await apiClient.post(`/login/`,{username, password})
+
+        console.log('the data react got is : ', response.data);
+        // console.log(response.status); // HTTP status code
+        // console.log(response.headers);
+      
+      if (response.data.token){
+        await AsyncStorage.setItem('@token', response.data.token);
+        
+        // verifying that the token is being stored
+        const token = await AsyncStorage.getItem('@token');
+        console.log('Stored token:', token);
+        
+        return response.data;
+
+        
+      }if (response.data && response.data.error) {
+          console.log('Backend error:', response.data.error);
+          throw new Error(response.data.error);
+      }else{
+        throw new Error('Wrong username or password');
+      }
+    }catch(error){
+        console.log('Error at the login function in Api.js line 50 : ',error)
+        throw error ;
+      }
+};
 
 
 
 export const register = async (username, password, email) => {
   try {
-    const response = await axios.post(`${BASE_URL}/register`, {
+    console.log('test api.register function...');
+
+    const response = await apiClient.post(`/register/`, {
       username,
       password,
-      email
+      email,
     });
+    if (response.data.success){
+      console.log('the data react got in api.register : ',response.data)
+      return response.data;
+    }else{
+      throw new Error('Registration failed :( ');
+    }
+  } catch (error) {
+    console.log('Error at the register function in Api.js', error.message);
+    throw error;
+  }
+};
+
+
+export const updateUsername = async (newUsername) => {
+  try {
+    //get the authent. token 
+    const token = await AsyncStorage.getItem('@token');
+    // Check if token exists 
+    if (!token) {
+      throw new Error('Api.js.updateUsername : Missing authentication token');
+    }
+    //send the token to the backend
+    const response = await apiClient.post(`/update-username/`, 
+      { username: newUsername },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    console.log('api.js.update username : the response react got is : ', response.data);
+    //in success case :
     return response.data;
   } catch (error) {
-    console.error(error);
+    console.error('Error at the updateUsername function in Api.js:', error);
+    throw error;
   }
 };
 
 
 
+export const changePassword = async (oldPassword, newPassword) => {
+  try {
+    //get the authent. token
+    const token = await AsyncStorage.getItem('@token');
+    //sending it to the backend
+    const response = await apiClient.post(`/update-password/`,
+      { old_password: oldPassword, new_password: newPassword },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    console.log('api.js.changepassword : the response react got : ' , response.data);
+    //in success case :
+
+    return response.data;
+  } catch (error) {
+    console.error('Error at the changePassword function in Api.js:', error);
+    throw error;
+  }
+};
 
 export const getProducts = async () => {
   try {
@@ -64,36 +142,18 @@ export const getProducts = async () => {
   }
 };
 
-// const BASE_URL = 'http://192.168.11.112:8000/';
+export const getUserDetails = async () => {
+  try {
+    const token = await AsyncStorage.getItem('@token');
+    const response = await apiClient.get(`/profile/`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
 
-// const fetchProducts = async () => {
-//   try {
-//     const response = await fetch(`${BASE_URL}mongo-products/`);
-
-//     if (response.status === 200) {
-//       console.log("got the response from the BE");
-//       const data = await response.json(); // Parse the JSON response
-//       return data;
-//     } else {
-//       throw new Error("Received non-200 status code");
-//     }
-//   } catch (error) {
-//     throw new Error(`api file => Error fetching products: ${error}`);
-//   }
-// };
-
-// export default fetchProducts;
+    return response.data;
+  } catch (error) {
+    console.error('Error at the getUserDetails function in Api.js:', error);
+    throw error;
+  }
+};
 
 
-
-// // Function to add a new product to the backend
-// export const addProduct = async (productData) => {
-//   try {
-//     const response = await axios.post(`${BASE_URL}/api/products/`, productData);
-//     return response.data;
-//   } catch (error) {
-//     throw new Error(`Error adding product: ${error.message}`);
-//   }
-// };
-
-// // Add more functions for other API endpoints as needed

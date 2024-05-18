@@ -17,24 +17,60 @@ SECRET_KEY = 'django-insecure-w&jx%jec49%hj=_dokd!o875vwx500m#tvqd1f83xob^uf1ts$
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-CORS_ORIGIN_ALLOW_ALL = True
+# CORS_ORIGIN_ALLOW_ALL = True
+# CORS_ALLOW_ALL_ORIGINS = True #idk which one is the correct one so both ig :/
+# this made another error  Access-Control-Allow-Origin header in the response cannot be a wildcard (*)
 
 ALLOWED_HOSTS = [   'localhost',
                     '192.168.11.112',
                     '192.168.100.105',
                     '127.0.0.1',
                     '192.168.11.168',
-                    '192.168.100.109']
+                    '192.168.100.109',
+                    '192.168.0.100',
+                    '192.168.254.213',]
 # ALLOWED_HOSTS = ['*']
 
+# CSRF_ENABLED = False
 
-# CORS_ALLOWED_ORIGINS = [
-#     "http://localhost:8081",
-#     "http://127.0.0.1:8081",
-#     "http://127.0.0.1:8000",  
-    
-# ]
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:8081",
+    "http://127.0.0.1:8081",
+    "http://127.0.0.1:8000",  
+    "http://0.0.0.0:8081",
+    'http://192.168.11.168:8081',
+    'http://192.168.11.168:8000',
+    'http://192.168.0.100:8081',
+     "http://localhost:3000",  # React Native debug server
+    "http://192.168.0.100", 
+    'http://192.168.254.213',
+]
+CORS_ALLOW_CREDENTIALS = True
 
+CORS_ALLOW_HEADERS = [
+'accept',
+'accept-encoding',
+'authorization',
+'content-type',
+'dnt',
+'origin',
+'user-agent',
+'x-csrftoken',
+'x-requested-with',
+]
+CORS_ALLOW_METHODS = [
+'DELETE',
+'GET',
+'OPTIONS',
+'PATCH',
+'POST',
+'PUT',
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    'http://localhost:8081',
+    'http://127.0.0.1:8081',
+]
 MONGODB_DATABASE = {
     'name': 'products_databse',        
     'host': 'localhost',        
@@ -61,6 +97,38 @@ INSTALLED_APPS = [
     'myapp.apps.MyappConfig',
 ]
 
+
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+}
+from datetime import timedelta
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'ROTATE_REFRESH_TOKENS': False,
+    'BLACKLIST_AFTER_ROTATION': True,
+
+    'ALGORITHM': 'HS256',
+    'SIGNING_KEY': 'secret',
+    'VERIFYING_KEY': None,
+
+    'AUTH_HEADER_TYPES': ('Bearer',),
+    'USER_ID_FIELD': 'id',
+    'USER_ID_CLAIM': 'user_id',
+
+    'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
+    'TOKEN_TYPE_CLAIM': 'token_type',
+
+    'JTI_CLAIM': 'jti',
+}
+
+
+
+
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
@@ -72,6 +140,8 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
       
 ]
+# CSRF_COOKIE_DOMAIN = 'http://localhost:8081/' #only need this one for subdomain handling.
+
 # CORS_ORIGIN_WHITELIST = (
 #     #'http://localhost:3000',
 #     'http://localhost:8081' , 

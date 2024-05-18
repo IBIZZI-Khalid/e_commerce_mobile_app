@@ -10,23 +10,5 @@ python manage.py runserver 0.0.0.0:8000
 make sure u installed all the libs and frameworks needed to run the app
 each time u connect to the wifi change the ipv4 + deactivate the firwall for the wifi
 
+gotta  either disable CSRF protection (not recommended for production) or include the CSRF token in your axios request./django_backend
 
-
-      {/* <MenuBar /> */}
-
-      <Text>Wiiiiiiiiiiiiiiiiiiiiwwwwoooooooooooo wiwowiwo</Text>
-      <Image source={require("./assets/image.png")}/> 
-      <TouchableHighlight onPress={()=> console.log("tapped!")}>
-
-      <Image
-      blurRadius ={1}
-      fadeDuration={1000}
-      source ={{
-        width:300,
-        height : 400,
-        uri : "https://pm1.narvii.com/7119/b0abdf491cffde4bdf95850956c1b15a5591a4b5r1-712-707v2_hq.jpg"
-      }}
-      
-      />
-
-      </TouchableHighlight>
