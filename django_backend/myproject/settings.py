@@ -2,6 +2,7 @@
 from pathlib import Path
 import django
 import os
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -17,7 +18,6 @@ SECRET_KEY = 'django-insecure-w&jx%jec49%hj=_dokd!o875vwx500m#tvqd1f83xob^uf1ts$
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-# CORS_ORIGIN_ALLOW_ALL = True
 # CORS_ALLOW_ALL_ORIGINS = True #idk which one is the correct one so both ig :/
 # this made another error  Access-Control-Allow-Origin header in the response cannot be a wildcard (*)
 
@@ -28,10 +28,14 @@ ALLOWED_HOSTS = [   'localhost',
                     '192.168.11.168',
                     '192.168.100.109',
                     '192.168.0.100',
-                    '192.168.254.213',]
+                    '192.168.254.213',
+                    '192.168.11.241',
+                    '192.168.100.150'
+                ]
 # ALLOWED_HOSTS = ['*']
 
 # CSRF_ENABLED = False
+# CORS_ORIGIN_ALLOW_ALL = True
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:8081",
@@ -44,6 +48,11 @@ CORS_ALLOWED_ORIGINS = [
      "http://localhost:3000",  # React Native debug server
     "http://192.168.0.100", 
     'http://192.168.254.213',
+    "http://192.168.11.241:8081",
+    "http://192.168.11.241",
+    'htpp://192.168.100.150:8081',
+    
+
 ]
 CORS_ALLOW_CREDENTIALS = True
 
@@ -71,6 +80,20 @@ CSRF_TRUSTED_ORIGINS = [
     'http://localhost:8081',
     'http://127.0.0.1:8081',
 ]
+# settings.py
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+}
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),  # Adjust as needed
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),    # Adjust as needed
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+}
+
 MONGODB_DATABASE = {
     'name': 'products_databse',        
     'host': 'localhost',        
@@ -126,6 +149,19 @@ SIMPLE_JWT = {
     'JTI_CLAIM': 'jti',
 }
 
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'DEBUG',
+    },
+}
 
 
 

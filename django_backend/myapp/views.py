@@ -36,6 +36,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import update_session_auth_hash
 
+from django.http import JsonResponse
 
 
 @login_required
@@ -95,13 +96,88 @@ class OrderItemViewSet(viewsets.ModelViewSet):
     queryset = OrderItem.objects.all()
     serializer_class = OrderItemSerializer
 
+# from rest_framework import generics, permissions
+# from rest_framework.response import Response
+# from .serializers import UserSerializer
+
+# class UserDetailView(generics.RetrieveAPIView):
+#     permission_classes = [permissions.IsAuthenticated]
+
+#     def get(self, request):
+#         user = request.user
+#         serializer = UserSerializer(user)
+#         return Response(serializer.data)
+
+
+
+logger = logging.getLogger(__name__)
+# class UserProfileViewSet(viewsets.ModelViewSet):
+#     queryset = UserProfile.objects.all()
+#     serializer_class = UserProfileSerializer
+#     permission_classes = [IsAuthenticated]
+
+#     def get_queryset(self):
+#         """ Ensure users can only see their own profile. """
+#         user = self.request.user
+#         logger.debug(f"Authenticated user: {user}")
+#         user_profiles = self.queryset.filter(user=user)
+#         logger.debug(f"User profiles found: {user_profiles}")
+#         return user_profiles
+    
+#     def get_object(self):
+#         """ Retrieve and return authenticated user's profile. """
+#         profile = UserProfile.objects.get(user = self.request.user)
+#         print('the user profile : ' , profile)
+#         return UserProfile.objects.get(user=self.request.user)
+
+ 
 class UserProfileViewSet(viewsets.ModelViewSet):
     queryset = UserProfile.objects.all()
     serializer_class = UserProfileSerializer
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         """ Ensure users can only see their own profile. """
-        return self.queryset.filter(user=self.request.user)
+        user = self.request.user
+        logger.debug(f"Authenticated user: {user}")
+        user_profiles = self.queryset.filter(user=user)
+        logger.debug(f"User profiles found: {user_profiles}")
+        return user_profiles
+    
+    def get_object(self):
+        """ Retrieve and return authenticated user's profile. """
+        profile = UserProfile.objects.get(user=self.request.user)
+        logger.debug(f"The user profile retrieved: {profile}")
+        return profile
+
+    def list(self, request, *args, **kwargs):
+        response = super(UserProfileViewSet, self).list(request, *args, **kwargs)
+        logger.debug(f"Response data: {response.data}")
+        return response
+
+
+# from rest_framework.views import APIView
+# from rest_framework.response import Response
+# from django.contrib.auth import get_user_model
+
+# class UserAPIView(APIView):
+#     permission_classes = [IsAuthenticated]
+#     def get(self, request):
+#         user = get_user_model().objects.get(username=request.user.username)
+#         return Response({
+#             'username': user.username ,
+#             'email': user.email,
+#             # add other user data...
+#         })
+
+@login_required
+def get_user_profile(request):
+    user_profile = UserProfile.objects.filter(user=request.user).first()
+    if user_profile:
+        return JsonResponse({'username': request.user.username, 'bio': user_profile.bio})
+    else:
+        return JsonResponse({'error': 'User profile not found'}, status=404)
+
 
 
 class CustomLoginView(LoginView):

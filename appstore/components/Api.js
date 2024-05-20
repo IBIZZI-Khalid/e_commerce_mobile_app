@@ -2,8 +2,8 @@ import axios from 'axios';
 // const BASE_URL = 'http://127.0.0.1/'
 // const BASE_URL = 'http://10.0.2.2:8000/'
 // const BASE_URL = 'http://localhost:8000/';
-// const BASE_URL = 'http://192.168.11.168:8000/';
-const BASE_URL = 'http://192.168.254.213:8000/'
+const BASE_URL = 'http://192.168.100.150:8000/';
+// const BASE_URL = 'http://192.168.254.213:8000/'
 // const BASE_URL = 'http://192.168.0.100:8000/'
 // const BASE_URL = 'http://192.168.100.109:8000/';
 
@@ -29,6 +29,7 @@ const apiClient = axios.create({
     // 'X-CSRFToken': csrftoken ,
   'Content-Type' : 'application/json',
   },
+  timeout :1000,
 });
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -144,12 +145,27 @@ export const getProducts = async () => {
 
 export const getUserDetails = async () => {
   try {
+    
+    console.log('testing before geting the data');
     const token = await AsyncStorage.getItem('@token');
-    const response = await apiClient.get(`/profile/`, {
+    console.log('testing after geting the data, token : ' , token );
+    
+    if(!token){
+     throw new Error('getUserDetails didnt get the token');  
+    
+    }const response = await apiClient.get(`/userprofiles/`, {
       headers: { Authorization: `Bearer ${token}` }
     });
 
-    return response.data;
+    console.log('API response:', response.data);  // Log the response
+    
+    if(response.data && response.data.length > 0) {
+      return response.data[0];  // Return the first profile
+    
+    } else {
+      throw new Error('No profile data found');
+    }
+  
   } catch (error) {
     console.error('Error at the getUserDetails function in Api.js:', error);
     throw error;

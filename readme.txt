@@ -12,3 +12,5 @@ each time u connect to the wifi change the ipv4 + deactivate the firwall for the
 
 gotta  either disable CSRF protection (not recommended for production) or include the CSRF token in your axios request./django_backend
 
+
+To fix this, you should adjust either the Django serializer to include these fields directly or modify the React Native component to correctly navigate through the nested data structure.
