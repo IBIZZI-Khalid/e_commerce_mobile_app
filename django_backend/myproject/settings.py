@@ -4,23 +4,13 @@ import django
 import os
 from datetime import timedelta
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 LOGIN_REDIRECT_URL = '/home/'
-
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-w&jx%jec49%hj=_dokd!o875vwx500m#tvqd1f83xob^uf1ts$'
-
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 # CORS_ALLOW_ALL_ORIGINS = True #idk which one is the correct one so both ig :/
 # this made another error  Access-Control-Allow-Origin header in the response cannot be a wildcard (*)
-
 ALLOWED_HOSTS = [   'localhost',
                     '192.168.11.112',
                     '192.168.100.105',
@@ -53,6 +43,7 @@ CORS_ALLOWED_ORIGINS = [
     'htpp://192.168.100.150:8081',
     
 
+
 ]
 CORS_ALLOW_CREDENTIALS = True
 
@@ -80,19 +71,13 @@ CSRF_TRUSTED_ORIGINS = [
     'http://localhost:8081',
     'http://127.0.0.1:8081',
 ]
-# settings.py
-REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-    ),
-}
 
-SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),  # Adjust as needed
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),    # Adjust as needed
-    'ROTATE_REFRESH_TOKENS': True,
-    'BLACKLIST_AFTER_ROTATION': True,
-}
+# SIMPLE_JWT = {
+#     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),  # Adjust as needed
+#     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),    # Adjust as needed
+#     'ROTATE_REFRESH_TOKENS': True,
+#     'BLACKLIST_AFTER_ROTATION': True,
+# }
 
 MONGODB_DATABASE = {
     'name': 'products_databse',        
@@ -117,7 +102,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'myproject',
     'rest_framework',
+    'rest_framework_simplejwt',
     'myapp.apps.MyappConfig',
+
 ]
 
 
@@ -127,27 +114,27 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
 }
-from datetime import timedelta
+# from datetime import timedelta
 
-SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
-    'ROTATE_REFRESH_TOKENS': False,
-    'BLACKLIST_AFTER_ROTATION': True,
+# SIMPLE_JWT = {
+#     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
+#     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+#     'ROTATE_REFRESH_TOKENS': False,
+#     'BLACKLIST_AFTER_ROTATION': True,
 
-    'ALGORITHM': 'HS256',
-    'SIGNING_KEY': 'secret',
-    'VERIFYING_KEY': None,
+#     'ALGORITHM': 'HS256',
+#     'SIGNING_KEY': 'secret',
+#     'VERIFYING_KEY': None,
 
-    'AUTH_HEADER_TYPES': ('Bearer',),
-    'USER_ID_FIELD': 'id',
-    'USER_ID_CLAIM': 'user_id',
+#     'AUTH_HEADER_TYPES': ('Bearer',),
+#     'USER_ID_FIELD': 'id',
+#     'USER_ID_CLAIM': 'user_id',
 
-    'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
-    'TOKEN_TYPE_CLAIM': 'token_type',
+#     'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
+#     'TOKEN_TYPE_CLAIM': 'token_type',
 
-    'JTI_CLAIM': 'jti',
-}
+#     'JTI_CLAIM': 'jti',
+# }
 
 LOGGING = {
     'version': 1,

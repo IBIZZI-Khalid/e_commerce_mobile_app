@@ -80,7 +80,6 @@ class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
 
-
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
@@ -96,41 +95,7 @@ class OrderItemViewSet(viewsets.ModelViewSet):
     queryset = OrderItem.objects.all()
     serializer_class = OrderItemSerializer
 
-# from rest_framework import generics, permissions
-# from rest_framework.response import Response
-# from .serializers import UserSerializer
-
-# class UserDetailView(generics.RetrieveAPIView):
-#     permission_classes = [permissions.IsAuthenticated]
-
-#     def get(self, request):
-#         user = request.user
-#         serializer = UserSerializer(user)
-#         return Response(serializer.data)
-
-
-
 logger = logging.getLogger(__name__)
-# class UserProfileViewSet(viewsets.ModelViewSet):
-#     queryset = UserProfile.objects.all()
-#     serializer_class = UserProfileSerializer
-#     permission_classes = [IsAuthenticated]
-
-#     def get_queryset(self):
-#         """ Ensure users can only see their own profile. """
-#         user = self.request.user
-#         logger.debug(f"Authenticated user: {user}")
-#         user_profiles = self.queryset.filter(user=user)
-#         logger.debug(f"User profiles found: {user_profiles}")
-#         return user_profiles
-    
-#     def get_object(self):
-#         """ Retrieve and return authenticated user's profile. """
-#         profile = UserProfile.objects.get(user = self.request.user)
-#         print('the user profile : ' , profile)
-#         return UserProfile.objects.get(user=self.request.user)
-
- 
 class UserProfileViewSet(viewsets.ModelViewSet):
     queryset = UserProfile.objects.all()
     serializer_class = UserProfileSerializer
@@ -155,20 +120,25 @@ class UserProfileViewSet(viewsets.ModelViewSet):
         logger.debug(f"Response data: {response.data}")
         return response
 
+from django.contrib.auth import get_user_model
+from .serializers import UserSerializer
+class UserProfileView(APIView):
+    permission_classes = [IsAuthenticated]
 
-# from rest_framework.views import APIView
-# from rest_framework.response import Response
-# from django.contrib.auth import get_user_model
+    def get(self, request):
+        user = request.user
+        logger.debug(f"view.py : Authenticated user: {user}")
 
-# class UserAPIView(APIView):
-#     permission_classes = [IsAuthenticated]
-#     def get(self, request):
-#         user = get_user_model().objects.get(username=request.user.username)
-#         return Response({
-#             'username': user.username ,
-#             'email': user.email,
-#             # add other user data...
-#         })
+        user_profile , created = UserProfile.objects.get_or_create(user=user)
+
+        if created :
+            logger.info(f"Created new profile for user: {user.username}")
+        else:
+            logger.info(f"Profile already exists for user: {user.username}")
+        serializer = UserProfileSerializer(user_profile)
+        logger.debug(f"view.py : User profile data: {serializer.data}")
+
+        return Response(serializer.data)
 
 @login_required
 def get_user_profile(request):
@@ -179,18 +149,6 @@ def get_user_profile(request):
         return JsonResponse({'error': 'User profile not found'}, status=404)
 
 
-
-class CustomLoginView(LoginView):
-    template_name = 'registration/login.html' 
-    redirect_authenticated_user = True  # Redirect users who are already logged in
-    success_url = reverse_lazy('home')  
-
-    def form_valid(self, form):
-        # Call super to make sure the user is logged in
-        response = super().form_valid(form)
-        # Add a success message
-        messages.success(self.request, f"Welcome back, {self.request.user.username}!")
-        return response
 
 class LoginView(APIView):
     def post(self, request, *args, **kwargs):
@@ -204,8 +162,8 @@ class LoginView(APIView):
 
             return Response({
                 'refresh': str(refresh),
-                'token': str(refresh.access_token),
-            })
+                'access': str(refresh.access_token),
+            }, status=201)
         else:
             return Response({'error': 'Invalid credentials'}, status=400)
 
@@ -226,6 +184,9 @@ class SignupView(APIView):
             email=email,
             password=make_password(password)  # Hash the password
         )
+
+        # Create a UserProfile instance
+        UserProfile.objects.create(user=user)
 
         # Generate JWT tokens
         refresh = RefreshToken.for_user(user)

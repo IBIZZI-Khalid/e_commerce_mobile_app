@@ -38,9 +38,9 @@ class UserProfileSerializer(ModelSerializer):
 
     class Meta:
         model = UserProfile
-        fields = ['user', 'email']
+        fields = ['user', 'bio']
 
-
+        
 # class UserProfileSerializer( ModelSerializer):
 #     username = serializers.CharField(source='user.username', read_only=True)
 #     email = serializers.EmailField(source='user.email', read_only=True)
