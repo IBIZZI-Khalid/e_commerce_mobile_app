@@ -1,88 +1,77 @@
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 // const BASE_URL = 'http://127.0.0.1/'
 // const BASE_URL = 'http://10.0.2.2:8000/'
 // const BASE_URL = 'http://localhost:8000/';
-const BASE_URL = 'http://192.168.100.150:8000/';
+const BASE_URL = 'http://192.168.11.241:8000/';
 // const BASE_URL = 'http://192.168.254.213:8000/'
 // const BASE_URL = 'http://192.168.0.100:8000/'
 // const BASE_URL = 'http://192.168.100.109:8000/';
-
-export const fetchProducts = async () => { 
-    
-    const response = await axios.get(`${BASE_URL}mongo-products/`).then(response=>{
-      if (response.status== 200) {
-        console.log("got the response from the BE")
-        return response.data.products_data;                       
-      }
-      else{
-        console.log('response =! 200')
-      }
-    }).catch(error => {
-      console.log(error);});   
-  return response;  
-    }
 
 const apiClient = axios.create({
   baseURL: BASE_URL,
   withCredentials: true,
   headers: {
-    // 'X-CSRFToken': csrftoken ,
   'Content-Type' : 'application/json',
   },
   timeout :1000,
 });
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export const login = async (username,password) =>{
+export const fetchProducts = async () => { 
     try{
-      console.log('testing login function...');
-      console.log('Sending login request with:', { username, password });
+      const response = await apiClient.get(`/mongo-products/`);
+      return response.data;                       
+    } catch(error){
+      console.log('api.js : error fetching the products ', error);
+      throw error; 
+    };
+  }
 
-      const response = await apiClient.post(`/login/`,{username, password})
 
-        console.log('the data react got is : ', response.data);
-        // console.log(response.status); // HTTP status code
-        // console.log(response.headers);
-      
-      if (response.data.token){
-        await AsyncStorage.setItem('@token', response.data.token);
-        
-        // verifying that the token is being stored
-        const token = await AsyncStorage.getItem('@token');
-        console.log('Stored token:', token);
-        
-        return response.data;
 
-        
-      }if (response.data && response.data.error) {
-          console.log('Backend error:', response.data.error);
-          throw new Error(response.data.error);
-      }else{
-        throw new Error('Wrong username or password');
-      }
-    }catch(error){
-        console.log('Error at the login function in Api.js line 50 : ',error)
-        throw error ;
-      }
+
+ 
+export const login = async (username, password) => {
+  try {
+    const response = await apiClient.post(`/login/`, { username, password });
+    if (response) {
+        if (response.data.access) {
+          await AsyncStorage.setItem('@accessToken', response.data.access);
+          await AsyncStorage.setItem('@refreshToken', response.data.refresh);
+
+          // Verifying that the token is being stored
+          const storedAccessToken = await AsyncStorage.getItem('@accessToken');
+          const storedRefreshToken = await AsyncStorage.getItem('@refreshToken');
+
+          console.log('(api.js.login) Stored access token:', storedAccessToken);
+          console.log('(api.js.login) Stored refresh token:', storedRefreshToken);
+
+          return response.data;
+        } else {
+          throw new Error('Wrong username or password');
+        }
+    }else{
+      console.log('response =! 200')
+    }
+  } catch (error) {
+    console.log('Error at the login function in Api.js:', error.message);
+    throw error;
+  }
 };
-
-
 
 export const register = async (username, password, email) => {
   try {
     console.log('test api.register function...');
 
-    const response = await apiClient.post(`/register/`, {
-      username,
-      password,
-      email,
-    });
-    if (response.data.success){
-      console.log('the data react got in api.register : ',response.data)
+    const response = await apiClient.post(`/register/`, { username, password, email });
+
+    if (response.data.success) {
+      console.log('the data react got in api.register :', response.data);
       return response.data;
-    }else{
-      throw new Error('Registration failed :( ');
+    } else {
+      throw new Error('Registration failed :(');
     }
   } catch (error) {
     console.log('Error at the register function in Api.js', error.message);
@@ -90,11 +79,10 @@ export const register = async (username, password, email) => {
   }
 };
 
-
 export const updateUsername = async (newUsername) => {
   try {
     //get the authent. token 
-    const token = await AsyncStorage.getItem('@token');
+    const token = await AsyncStorage.getItem('@accessToken');
     // Check if token exists 
     if (!token) {
       throw new Error('Api.js.updateUsername : Missing authentication token');
@@ -114,11 +102,10 @@ export const updateUsername = async (newUsername) => {
 };
 
 
-
 export const changePassword = async (oldPassword, newPassword) => {
   try {
     //get the authent. token
-    const token = await AsyncStorage.getItem('@token');
+    const token = await AsyncStorage.getItem('@accessToken');
     //sending it to the backend
     const response = await apiClient.post(`/update-password/`,
       { old_password: oldPassword, new_password: newPassword },
@@ -147,24 +134,23 @@ export const getUserDetails = async () => {
   try {
     
     console.log('testing before geting the data');
-    const token = await AsyncStorage.getItem('@token');
+    const token = await AsyncStorage.getItem('@accessToken');
     console.log('testing after geting the data, token : ' , token );
     
     if(!token){
      throw new Error('getUserDetails didnt get the token');  
     
-    }const response = await apiClient.get(`/userprofiles/`, {
-      headers: { Authorization: `Bearer ${token}` }
+    }const response = await apiClient.get(`/api/profile/`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
     });
 
     console.log('API response:', response.data);  // Log the response
     
-    if(response.data && response.data.length > 0) {
-      return response.data[0];  // Return the first profile
     
-    } else {
-      throw new Error('No profile data found');
-    }
+      return response.data ;
   
   } catch (error) {
     console.error('Error at the getUserDetails function in Api.js:', error);

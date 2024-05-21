@@ -5,7 +5,6 @@ from .views import (
     CategoryViewSet , 
     OrderViewSet  , 
     OrderItemViewSet , 
-    UserProfileViewSet, 
     profile ,home ,
     list_mongo_products, 
     add_mongo_product ,
@@ -13,8 +12,8 @@ from .views import (
     SignupView,
     ChangePasswordView,
     UpdateUsernameView,
-# UserAPIView,
-    # UserDetailView,
+    #UserAPIView,
+    #UserDetailView,
     UserProfileView
     )
 from django.contrib.auth import views as auth_views

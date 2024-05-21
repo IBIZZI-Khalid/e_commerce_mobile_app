@@ -16,7 +16,7 @@ const Account = () => {
     try {
       const data = await login(username, password);
 
-      if (data.token) {
+      if (data.access) {
         await localStorage.setItem('@token', data.token);
         navigation.navigate('MainApp'); // Navigate to main app
       } else {

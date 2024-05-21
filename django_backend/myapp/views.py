@@ -51,8 +51,11 @@ def profile(request):
 @api_view(['GET'])
 def list_mongo_products(request):
     db = get_mongo_connection()
-    products = list(db.product_collection.find({}, {"_id": 0}))  # Exclude _id field
-    # Assume that we serialize data properly here
+    products = list(db.product_collection.find({}, {"_id": 1, "name": 1, "description": 1, "price": 1, "image": 1}))  # Exclude _id field
+    
+    #converting object id to a string 
+    for product in products:
+        product["_id"] = str(product["_id"])
     return Response({'products_data': products})
 
 

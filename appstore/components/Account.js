@@ -20,19 +20,19 @@ const LoginScreen = ({ navigation }) => {
 
       const data = await login(username,password);
       
-      if (data.token) { //the presence of a token means successful login 
-        await AsyncStorage.setItem('@token', data.token); //this line just saves the item 
+      if (data.access) { //the presence of a token means successful login 
+        await AsyncStorage.setItem('@accessToken', data.access);
+        await AsyncStorage.setItem('@refreshToken', data.refresh);
         navigation.navigate('AccountDetails'); //navigate to the mainpage after 
       } else {
         // Handle login failure
-        console.error('Login failed' , data.token);
-        alert('Login failed. Please check your credentials.'); // Inform the user
+        alert('Login failed. Please check your credentials.');
 
       }
     } catch (error) {
       // Handle error
       console.error(error);
-      alert('An error occurred. Please try again later.');
+      alert('An error occurred. Please try again later.',error.message);
     } finally{
       setIsLoading(false); // Hide the loading thing 
     }
@@ -73,19 +73,18 @@ const SignupScreen = ({ navigation }) => {
 
   
   const handleRegister = async () => {
-    setIsLoading(true); // Show dak loading thing
+    setIsLoading(true); 
     try {
       console.log('test handleregister function...');
       const data = await register( username , password , email );
       if (data.success) {
-        // Handle successful registration
-        console.log('Registeration kmel !')
+        
         alert("Registration Successful ! You can log in now .")
         setUsername('');
         setPassword('');
         setEmail(''); // Clear registration fields 
       } else {
-        // Handle registration failure
+        
         console.error('Failed to create an account',data.error);
         alert('There was a problem ! Please try again. maybe with difrent info ? :) ')
       } 
@@ -129,64 +128,6 @@ const SignupScreen = ({ navigation }) => {
   
 };
 
-
-const AccountDetailsScreen = ({ navigation }) => {
-  const [username, setUsername] = useState('');
-  const [email, setEmail] = useState('');
-
-  useEffect(() => {
-    const fetchUserDetails = async () => {
-      try {
-        console.log('fetching user details...');
-        const data = await getUserDetails();
-        console.log('user details fetched:', data);
-
-        setUsername(data.user.username);
-        setEmail(data.user.email);
-      } catch (error) {
-        console.log('error while fetching the details : ',error);
-        Alert.alert('Error', error.response?.data?.error || error.message);
-      }
-    };
-
-    fetchUserDetails();
-  }, []);
-
-  return (
-    <View style={styles.container}>
-      <Text>Account Details</Text>
-      <Text>Username: {username}</Text>
-      <Text>Email: {email}</Text>
-
-      <Button title="Edit Details" onPress={() => navigation.navigate('EditAccountDetails')} />
-    </View>
-  );
-};
- 
-
-const UserProfileScreen = () => {
-  const [userData, setUserData] = useState(null);
-
-  useEffect(() => {
-    axios.get('http://localhost:8000/api/user')
-      .then(response => setUserData(response.data));
-  }, []);
-
-  if (!userData) {
-    return <Text>Loading...</Text>;
-  }
-
-  return (
-    <View>
-      <Text>{userData.username}</Text>
-      <Text>{userData.email}</Text>
-      // display other user data...
-    </View>
-  );
-};
-
- 
-
 const EditAccountScreen = ({navigation}) =>{
 
   const [username, setUsername] = useState('');
@@ -214,7 +155,7 @@ const EditAccountScreen = ({navigation}) =>{
   };
 
   const handleLogout = async () => {
-    await AsyncStorage.removeItem('@token');
+    await AsyncStorage.removeItem('@accessToken');
     navigation.navigate('Login');
   };
 
@@ -251,7 +192,100 @@ const EditAccountScreen = ({navigation}) =>{
       <Button title="Logout" onPress={handleLogout} />
     </View>
   );
+}; 
+
+const UserProfile =({navigation})=> {
+  const [profile, setProfile] = useState(null);
+
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        const userProfile = await getUserDetails();
+        setProfile(userProfile);
+      } catch (error) {
+        console.error('Error fetching user profile:', error);
+      }
+    };
+
+    fetchUserProfile();
+  }, []);
+
+  return (
+    <View>
+      {profile ? (
+        <View>
+          <Text>Username: {profile.user.username}</Text>
+          <Text>Email: {profile.user.email}</Text>
+          <Text>Bio: {profile.bio}</Text>
+          <Button title="Edit Details" onPress={() => navigation.navigate('EditAccountDetails')} />
+        </View>
+      ) : (
+        
+        <Text>Loading...</Text>
+      )}
+    </View>
+  );
 };
+
+ 
+
+
+// const AccountDetailsScreen = ({ navigation }) => {
+//   const [username, setUsername] = useState('');
+//   const [email, setEmail] = useState('');
+
+//   useEffect(() => {
+//     const fetchUserDetails = async () => {
+//       try {
+//         console.log('fetching user details...');
+//         const data = await getUserDetails();
+//         console.log('user details fetched:', data);
+
+//         setUsername(data.user.username);
+//         setEmail(data.user.email);
+//       } catch (error) {
+//         console.log('error while fetching the details : ',error);
+//         Alert.alert('Error', error.response?.data?.error || error.message);
+//       }
+//     };
+
+//     fetchUserDetails();
+//   }, []);
+
+//   return (
+//     <View style={styles.container}>
+//       <Text>Account Details</Text>
+//       <Text>Username: {username}</Text>
+//       <Text>Email: {email}</Text>
+
+//       <Button title="Edit Details" onPress={() => navigation.navigate('EditAccountDetails')} />
+//     </View>
+//   );
+// };
+ 
+
+// const UserProfileScreen = () => {
+//   const [userData, setUserData] = useState(null);
+
+//   useEffect(() => {
+//     axios.get('http://localhost:8000/api/user')
+//       .then(response => setUserData(response.data));
+//   }, []);
+
+//   if (!userData) {
+//     return <Text>Loading...</Text>;
+//   }
+
+//   return (
+//     <View>
+//       <Text>{userData.username}</Text>
+//       <Text>{userData.email}</Text>
+//       // display other user data...
+//     </View>
+//   );
+// };
+
+ 
  
 const styles = StyleSheet.create({
   container: {
@@ -282,8 +316,8 @@ const AccountNavigator =() =>{
     <AccountStack.Navigator initialRouteName='Login'>
       <AccountStack.Screen name='Login' component={LoginScreen} />
       <AccountStack.Screen name='Signup' component={SignupScreen} />
-      <AccountStack.Screen name='AccountDetails' component={AccountDetailsScreen} />
-      {/* <AccountStack.Screen name='AccountDetails' component={UserProfileScreen} /> */}
+      {/* <AccountStack.Screen name='AccountDetails' component={AccountDetailsScreen} /> */}
+      <AccountStack.Screen name='AccountDetails' component={UserProfile} />
 
       <AccountStack.Screen name='EditAccountDetails' component={EditAccountScreen} />
     </AccountStack.Navigator>
