@@ -9,8 +9,6 @@ LOGIN_REDIRECT_URL = '/home/'
 SECRET_KEY = 'django-insecure-w&jx%jec49%hj=_dokd!o875vwx500m#tvqd1f83xob^uf1ts$'
 DEBUG = True
 
-# CORS_ALLOW_ALL_ORIGINS = True #idk which one is the correct one so both ig :/
-# this made another error  Access-Control-Allow-Origin header in the response cannot be a wildcard (*)
 ALLOWED_HOSTS = [   'localhost',
                     '192.168.11.112',
                     '192.168.100.105',
@@ -20,12 +18,10 @@ ALLOWED_HOSTS = [   'localhost',
                     '192.168.0.100',
                     '192.168.254.213',
                     '192.168.11.241',
-                    '192.168.100.150'
+                    '192.168.100.150',
+                    '192.168.100.109'
                 ]
-# ALLOWED_HOSTS = ['*']
-
-# CSRF_ENABLED = False
-# CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_ALL_ORIGINS = True
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:8081",
@@ -35,14 +31,12 @@ CORS_ALLOWED_ORIGINS = [
     'http://192.168.11.168:8081',
     'http://192.168.11.168:8000',
     'http://192.168.0.100:8081',
-     "http://localhost:3000",  # React Native debug server
     "http://192.168.0.100", 
     'http://192.168.254.213',
     "http://192.168.11.241:8081",
     "http://192.168.11.241",
-    'htpp://192.168.100.150:8081',
-    
-
+    'htpp://192.168.100.109:8081',
+    "http://192.168.100.109",
 
 ]
 CORS_ALLOW_CREDENTIALS = True
@@ -72,13 +66,6 @@ CSRF_TRUSTED_ORIGINS = [
     'http://127.0.0.1:8081',
 ]
 
-# SIMPLE_JWT = {
-#     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),  # Adjust as needed
-#     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),    # Adjust as needed
-#     'ROTATE_REFRESH_TOKENS': True,
-#     'BLACKLIST_AFTER_ROTATION': True,
-# }
-
 MONGODB_DATABASE = {
     'name': 'products_databse',        
     'host': 'localhost',        
@@ -86,11 +73,9 @@ MONGODB_DATABASE = {
     'database': 'products_database',
     'product_collection': 'product_collection',
     'username': None,    
-    'password': None,    }
-
-
+    'password': None,    
+    }
 # Application definition
-
 INSTALLED_APPS = [
     'corsheaders',
     'django',
@@ -114,28 +99,6 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
 }
-# from datetime import timedelta
-
-# SIMPLE_JWT = {
-#     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
-#     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
-#     'ROTATE_REFRESH_TOKENS': False,
-#     'BLACKLIST_AFTER_ROTATION': True,
-
-#     'ALGORITHM': 'HS256',
-#     'SIGNING_KEY': 'secret',
-#     'VERIFYING_KEY': None,
-
-#     'AUTH_HEADER_TYPES': ('Bearer',),
-#     'USER_ID_FIELD': 'id',
-#     'USER_ID_CLAIM': 'user_id',
-
-#     'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
-#     'TOKEN_TYPE_CLAIM': 'token_type',
-
-#     'JTI_CLAIM': 'jti',
-# }
-
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -163,22 +126,6 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
       
 ]
-# CSRF_COOKIE_DOMAIN = 'http://localhost:8081/' #only need this one for subdomain handling.
-
-# CORS_ORIGIN_WHITELIST = (
-#     #'http://localhost:3000',
-#     'http://localhost:8081' , 
-#     'http://127.0.0.1:8081',
-#     'http://192.168.11.112:8081',
-    
-#     "http://localhost:8081",
-#     "http://localhost:19006",
-#     "http://localhost:19002",
-#     "http://192.168.11.112:19000",
-
-#     #this allows django to accept requests from the app running at port 8081
-# )
-# realted to connecting django to react native  app ^^
 
 ROOT_URLCONF = 'myproject.urls'
 
@@ -205,22 +152,16 @@ DATABASES = {
     'default': {
         'ENGINE': 'djongo',
         'NAME': 'products_database',
-        'ENFORCE_SCHEMA' : False, #This line is added to ignore the error of not having a schema in MongoDB database
+        'ENFORCE_SCHEMA' : False,
         'CLIENT': {
             'host': 'localhost',
             'port': 27017,
             'username': None,
             'password': None,
-            # 'authSource': 'admin',
-            # 'authMechanism': 'SCRAM-SHA-1'
         },
        
     }
 }
-
-
-# Password validation
-# https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -237,10 +178,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
-# Internationalization
-# https://docs.djangoproject.com/en/5.0/topics/i18n/
-
 LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'UTC'
@@ -250,13 +187,8 @@ USE_I18N = True
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 STATIC_URL = 'static/'
-
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 

@@ -4,10 +4,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // const BASE_URL = 'http://127.0.0.1/'
 // const BASE_URL = 'http://10.0.2.2:8000/'
 // const BASE_URL = 'http://localhost:8000/';
-const BASE_URL = 'http://192.168.11.241:8000/';
+// const BASE_URL = 'http://192.168.11.241:8000/';
 // const BASE_URL = 'http://192.168.254.213:8000/'
 // const BASE_URL = 'http://192.168.0.100:8000/'
-// const BASE_URL = 'http://192.168.100.109:8000/';
+const BASE_URL = 'http://192.168.100.109:8000/';
 
 const apiClient = axios.create({
   baseURL: BASE_URL,
@@ -24,7 +24,7 @@ export const fetchProducts = async () => {
       const response = await apiClient.get(`/mongo-products/`);
       return response.data;                       
     } catch(error){
-      console.log('api.js : error fetching the products ', error);
+      console.log('api.js : error fetching the products ', error.message);
       throw error; 
     };
   }
@@ -38,6 +38,7 @@ export const login = async (username, password) => {
     const response = await apiClient.post(`/login/`, { username, password });
     if (response) {
         if (response.data.access) {
+
           await AsyncStorage.setItem('@accessToken', response.data.access);
           await AsyncStorage.setItem('@refreshToken', response.data.refresh);
 
@@ -49,8 +50,10 @@ export const login = async (username, password) => {
           console.log('(api.js.login) Stored refresh token:', storedRefreshToken);
 
           return response.data;
+
         } else {
           throw new Error('Wrong username or password');
+        
         }
     }else{
       console.log('response =! 200')
