@@ -2,7 +2,8 @@ import {
   StyleSheet, 
   Text, 
   View ,
-  TouchableOpacity  } from 'react-native';
+  TouchableOpacity,  
+  Pressable} from 'react-native';
 import { Image } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -13,30 +14,10 @@ import AccountNavigator from './components/Account.js';
 import Mainpage from './components/Mainpage.js';
 import * as React from 'react';
 import * as SplashScreen from 'expo-splash-screen';
-import * as Font from 'expo-font';
 import { Asset } from 'expo-asset';
-import SplashScreenComponent from './components/SplashScreen.js';
 
-// SplashScreen.preventAutoHideAsync(); // Keep the splash screen visible while we fetch resources
+SplashScreen.preventAutoHideAsync();
 
-const styles = StyleSheet.create({
-  tabNavigator:{
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  shadow :{
-    shadowColor : '#246778',
-    shadowOffset   :{
-      width : 0 ,
-      height : 10 , 
-    },
-    shadowOpacity : 0.25,
-    shadowRadius : 3.5,
-    elevation : 5 ,
-
-  }
-})
 
 function MyTabBar({ state, descriptors, navigation }) {
   return (
@@ -77,9 +58,9 @@ function MyTabBar({ state, descriptors, navigation }) {
         };
 
         return ( 
-          <TouchableOpacity
+          <Pressable
             key={route.key}
-            accessibilityRole="button"
+            role ="button"
             accessibilityState={isFocused ? { selected: true } : {}}
             accessibilityLabel={options.tabBarAccessibilityLabel}
             testID={options.tabBarTestID}
@@ -90,7 +71,7 @@ function MyTabBar({ state, descriptors, navigation }) {
                   }
           >
             {options.tabBarIcon && options.tabBarIcon({ focused: isFocused })}
-          </TouchableOpacity>
+          </Pressable>
         );
       })}
     </View>
@@ -98,10 +79,8 @@ function MyTabBar({ state, descriptors, navigation }) {
 }
 
 
-
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
-
 function TabNavigator() {
   return (
       <Tab.Navigator 
@@ -141,7 +120,7 @@ function TabNavigator() {
                     
                     width:25,
                     height :25,
-                    tintColor : focused ? '#4d3b75' : '#20948B',
+                    tintColor : focused ?  '#A77EFB':'#4d3b75',
                   }}/>
 
                 
@@ -242,30 +221,12 @@ function TabNavigator() {
 
 export default function App(){
   const [appIsReady , setAppIsReady] = React.useState(false);
-
- 
-    
+  
+  
+  
   React.useEffect(() => {
-//     const prepare = async () => {
-//       try {
-//         //simulate a loading task ...
-//         await new Promise (resolve => setTimeout(resolve,2000));
-//         setAppIsReady(true);
-        
-//       }catch(error){
-//         throw new error('error at prepare function App.js ',error);
-//       }}
-//      
-//  if (!appIsReady) {
-  //     // return <SplashScreenComponent />; 
-  //   }
     async function prepare() {
       try {
-        // Pre-load fonts, make any API calls you need to do here
-        // await Font.loadAsync({
-        // // Load any custom fonts here
-        // });
-        // Pre-load assets
         await Asset.loadAsync([
           require('./assets/splash.png'),
           //more assets to preload here
@@ -291,3 +252,23 @@ export default function App(){
     // react-navigation is used to manage and control the navigation between different screens in our app
   )
 }
+
+
+const styles = StyleSheet.create({
+  tabNavigator:{
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  shadow :{
+    shadowColor : '#246778',
+    shadowOffset   :{
+      width : 0 ,
+      height : 10 , 
+    },
+    shadowOpacity : 0.25,
+    shadowRadius : 3.5,
+    elevation : 5 ,
+
+  }
+})
