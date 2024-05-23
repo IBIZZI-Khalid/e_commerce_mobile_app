@@ -12,63 +12,13 @@ import Header from './components/Header.js';
 import AccountNavigator from './components/Account.js';
 import Mainpage from './components/Mainpage.js';
 import * as React from 'react';
+import * as SplashScreen from 'expo-splash-screen';
+import * as Font from 'expo-font';
+import { Asset } from 'expo-asset';
+import SplashScreenComponent from './components/SplashScreen.js';
 
-//   const Tab = createBottomTabNavigator();
+// SplashScreen.preventAutoHideAsync(); // Keep the splash screen visible while we fetch resources
 
-
-//   const styles = StyleSheet.create({
-//     container: {
-//       paddingTop:25,
-//       flex: 1,
-//       flexDirection :'column',
-//       backgroundColor: '#0093AF',
-//       alignItems: 'center',
-//       justifyContent: 'center',
-//     },
-//     header: {
-//       flex: 1, // Allocates equal space to the header (can be adjusted)
-//       backgroundColor: '#f0f0f0', // Example background color
-//       alignItems: 'center', // Centers content horizontally
-//       justifyContent: 'center', // Centers content vertically
-      
-//     },
-//     content: {
-//       flex: 2, // Allocates twice the space for content (can be adjusted)
-//       backgroundColor: 'red', // Example background color
-//       padding: 10, // Adds some padding for better readability
-//     },
-//   });
-
-//   function MyTabs(){
-//     return (
-//       <Tab.Navigator>
-//         <Tab.Screen name="HOME" component={Mainpage} />
-//         <Tab.Screen name="SEARCH" component={Mainpage} />
-//         <Tab.Screen name="CART" component={Mainpage} />
-//         <Tab.Screen name="ACCOUNT" component={Mainpage} />
-
-//         {/* zid other screens ... */}
-//       </Tab.Navigator>
-//     )
-//   }
-
-// export default function App() {
-//   return (<>
-    
-//     {/* we use SafeAreaView so that  our app will adapt to any screen size and device type. It helps us create responsive apps. */}
-    
-
-//       <SafeAreaView style={styles.container}>
-//         <Header style={styles.header} /> 
-//         <NavigationContainer style={styles.content}>
-//           <MyTabs />
-//           <StatusBar style="auto" />
-//         </NavigationContainer>  
-
-//       </SafeAreaView>
-
-//     </>);
-// }
 const styles = StyleSheet.create({
   tabNavigator:{
     flex: 1,
@@ -76,13 +26,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   shadow :{
-
     shadowColor : '#246778',
-    
     shadowOffset   :{
       width : 0 ,
-      height : 10 , },
-
+      height : 10 , 
+    },
     shadowOpacity : 0.25,
     shadowRadius : 3.5,
     elevation : 5 ,
@@ -109,15 +57,7 @@ function MyTabBar({ state, descriptors, navigation }) {
       {state.routes.map((route, index) => {
 
         const { options } = descriptors[route.key];
-        // const label =
-        //   options.tabBarLabel !== undefined
-        //     ? options.tabBarLabel
-        //     : options.title !== undefined
-        //       ? options.title
-        //       : route.name;
-
         const isFocused = state.index === index;
-
         const onPress = () => {
           const event = navigation.emit({
             type: 'tabPress',
@@ -138,6 +78,7 @@ function MyTabBar({ state, descriptors, navigation }) {
 
         return ( 
           <TouchableOpacity
+            key={route.key}
             accessibilityRole="button"
             accessibilityState={isFocused ? { selected: true } : {}}
             accessibilityLabel={options.tabBarAccessibilityLabel}
@@ -145,12 +86,10 @@ function MyTabBar({ state, descriptors, navigation }) {
             onPress={onPress}
             onLongPress={onLongPress}
             style={{ flex: 1 ,
-             }}
+                   }
+                  }
           >
             {options.tabBarIcon && options.tabBarIcon({ focused: isFocused })}
-            {/* <Text style={{ color: isFocused ? '#673ab7' : '#222' }}>
-              {label}
-            </Text> */}
           </TouchableOpacity>
         );
       })}
@@ -302,6 +241,45 @@ function TabNavigator() {
 }
 
 export default function App(){
+  const [appIsReady , setAppIsReady] = React.useState(false);
+
+ 
+    
+  React.useEffect(() => {
+//     const prepare = async () => {
+//       try {
+//         //simulate a loading task ...
+//         await new Promise (resolve => setTimeout(resolve,2000));
+//         setAppIsReady(true);
+        
+//       }catch(error){
+//         throw new error('error at prepare function App.js ',error);
+//       }}
+//      
+//  if (!appIsReady) {
+  //     // return <SplashScreenComponent />; 
+  //   }
+    async function prepare() {
+      try {
+        // Pre-load fonts, make any API calls you need to do here
+        // await Font.loadAsync({
+        // // Load any custom fonts here
+        // });
+        // Pre-load assets
+        await Asset.loadAsync([
+          require('./assets/splash.png'),
+          //more assets to preload here
+        ]);
+      } catch (e) {
+        console.warn(e);
+      } finally {
+        setAppIsReady(true);
+        SplashScreen.hideAsync(); // Hide the splash screen after resources are loaded
+      }
+    }
+
+   prepare();}, []);
+
   return(
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Home">

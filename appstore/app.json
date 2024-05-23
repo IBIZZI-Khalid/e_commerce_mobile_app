@@ -1,18 +1,16 @@
 {
   "expo": {
-    "jsEngine": "hermes" ,
-
+    "jsEngine": "hermes",
     "name": "appstore",
     "slug": "appstore",
     "version": "1.0.0",
     "orientation": "portrait",
-    
     "icon": "./assets/image.png",
     "userInterfaceStyle": "light",
-     "splash": {
+    "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#000000"
     },
     "assetBundlePatterns": [
       "**/*"
@@ -28,7 +26,9 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
-    
+    },
+    "plugins": [
+      "expo-asset"
+    ]
   }
 }
