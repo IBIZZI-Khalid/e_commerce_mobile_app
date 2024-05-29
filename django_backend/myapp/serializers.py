@@ -2,7 +2,7 @@
 #often used in web development to convert data into a format like JSON or XML, which can be easily sent over the internet.
 from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
-from .models import Product, Category, Order, OrderItem, UserProfile
+from .models import Product, Category, Order, OrderItem, UserProfile ,Cart
 
 class ProductSerializer(ModelSerializer):
     class Meta:
@@ -40,21 +40,7 @@ class UserProfileSerializer(ModelSerializer):
         model = UserProfile
         fields = ['user', 'bio']
 
-        
-# class UserProfileSerializer( ModelSerializer):
-#     username = serializers.CharField(source='user.username', read_only=True)
-#     email = serializers.EmailField(source='user.email', read_only=True)
-
-#     class Meta:
-#         model = UserProfile
-#         fields = ['username' , 'email']
-
-
-# # serializers.py
-# from django.contrib.auth.models import User
-# from rest_framework import serializers
-
-# class UserSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = User
-#         fields = ['id', 'username' , 'email',]
+class CartSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Cart
+        fields = '__all__'

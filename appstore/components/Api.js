@@ -5,7 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // const BASE_URL = 'http://10.0.2.2:8000/'
 // const BASE_URL = 'http://localhost:8000/';
 // const BASE_URL = 'http://192.168.11.241:8000/';
-// const BASE_URL = 'http://192.168.254.213:8000/'
+// const BASE_URL = 'http://192.168.11.69:8000/'
 // const BASE_URL = 'http://192.168.100.150:8000/'
 const BASE_URL = 'http://192.168.100.109:8000/';
 
@@ -15,7 +15,7 @@ const apiClient = axios.create({
   headers: {
   'Content-Type' : 'application/json',
   },
-  timeout :5000,
+  // timeout :5000,
 });
 
 
@@ -30,9 +30,6 @@ export const fetchProducts = async () => {
   }
 
 
-
-
- 
 export const login = async (username, password) => {
   try {
     const response = await apiClient.post(`/login/`, { username, password });
@@ -124,14 +121,6 @@ export const changePassword = async (oldPassword, newPassword) => {
   }
 };
 
-export const getProducts = async () => {
-  try {
-    const response = await axios.get(`${BASE_URL}/products`);
-    return response.data;
-  } catch (error) {
-    console.error(error);
-  }
-};
 
 export const getUserDetails = async () => {
   try {
@@ -162,3 +151,40 @@ export const getUserDetails = async () => {
 };
 
 
+export const searchProduct = async(searchQuery)=>{
+  try {
+    const response = await apiClient.post(`/search/` , {searchQuery});
+    console.log('API response:', response.data);  
+    return response.data;
+  }catch(error){
+    console.log('api.js: error searching for the product ', error.message );
+    throw error;
+  }
+};
+
+
+// apiClient.interceptors.request.use(async (config) => {
+//   const token = await AsyncStorage.getItem('@accessToken');
+//   if (token) {
+//     config.headers.Authorization = `Bearer ${token}`;
+//   }
+//   return config;
+// });
+
+export const fetchCart = async () => {
+  try {
+    const response = await apiClient.get('/cart/');
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const updateCart = async (cart) => {
+  try {
+    const response = await apiClient.put('/cart/', { items: cart });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};

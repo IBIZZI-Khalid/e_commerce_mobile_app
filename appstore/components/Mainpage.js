@@ -1,13 +1,91 @@
-import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, Text, Image, FlatList, ActivityIndicator, ScrollView } from 'react-native';
+import React, { memo, useCallback, useEffect, useState } from 'react';
+import { StyleSheet,
+    View, Text, Image,
+    FlatList, ActivityIndicator,
+    TextInput,TouchableOpacity,
+    ScrollView, 
+    Platform} from 'react-native';
 import { fetchProducts } from './Api';
 import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Path } from 'react-native-svg';
 import { useFonts } from 'expo-font';
-import * as SplashScreen from 'expo-splash-screen';
-import Header from './Header';
+import UseSearchHandler from './Search.js';
+import { useNavigation } from '@react-navigation/native';
+import SearchResultScreen from './SearchResultScreen.js';
+import { SafeAreaView } from 'react-native-safe-area-context'
 
-const Wave = () => (
+const categories = ['Action', 'Family', 'Puzzle', 'Adventure', 'Racing', 'Education', 'Others'];
+const featured = [
+  {
+      id: 1,
+      title: 'Zooba',
+      image: require('../assets/Rappi.jpeg'),
+      downloads: '200k',
+      stars: 4
+  },
+  {
+      id: 2,
+      title: 'Subway Surfer',
+      image: require('../assets/Rappi.jpeg'),
+      downloads: '5M',
+      stars: 4
+  },
+  {
+      id: 3,
+      title: 'Free Fire',
+      image: require('../assets/Rappi.jpeg'),
+      downloads: '100M',
+      stars: 3
+  },
+  
+  {
+      id: 4,
+      title: "Alto's Adventure",
+      image: require('../assets/Rappi.jpeg'),
+      downloads: '20k',
+      stars: 4
+  },
+]
+
+const games = [
+  {
+      id: 1,
+      title: 'Shadow Fight',
+      image: require('../assets/Rappi.jpeg'),
+      downloads: '20M',
+      stars: 4.5
+  },
+  {
+      id: 2,
+      title: 'Valor Arena',
+      image: require('../assets/Rappi.jpeg'),
+      downloads: '10k',
+      stars: 3.4
+  },
+  {
+      id: 3,
+      title: 'Frag',
+      image: require('../assets/Rappi.jpeg'),
+      downloads: '80k',
+      stars: 4.6
+  },
+  {
+      id: 4,
+      title: "Zooba Wildlife",
+      image: require('../assets/Rappi.jpeg'),
+      downloads: '40k',
+      stars: 3.5
+  },
+  {
+      id: 4,
+      title: "Clash of Clans",
+      image: require('../assets/Rappi.jpeg'),
+      downloads: '20k',
+      stars: 4.2
+  },
+];
+
+const Wave = memo(() => (
   <View>
     <View style={styles.transparent_svg}>
       <Svg height="100%" width="100%" viewBox="0 0 400 100" preserveAspectRatio='none'>
@@ -34,46 +112,113 @@ const Wave = () => (
       </Svg>
     </View>
   </View>
-);
+));
+
+import { ArrowDownTrayIcon, HeartIcon } from 'react-native-heroicons/solid'
+import StarRating from 'react-native-star-rating';
+
+function GameCard({game}) {
+  const [isFavourite, setFavourite] = useState(false);
+return (
+  <View className="mr-4 relative">
+    <Image source={game.image} className="w-80 h-60 rounded-3xl"/>
+    <LinearGradient colors={['transparent', 'rgba(0, 0, 0, 0.6)']} 
+      className="absolute p-4 h-full w-full flex justify-between rounded-3xl">
+      <View className="flex-row justify-end">
+          <TouchableOpacity
+              onPress={()=> setFavourite(!isFavourite)}
+              className="p-3 rounded-full"
+              style={{backgroundColor: 'rgba(255,255,255,0.3)'}}
+          >
+              {/* <HeartIcon size="25" color={isFavourite? storeColors.redHeart: 'white'} /> */}
+          </TouchableOpacity>
+      </View>
+      <View className="space-y-1">
+          <StarRating
+              disabled={true}
+              starSize={15}
+              containerStyle={{width: 90}}
+              maxStars={5}
+              rating={game.stars}
+              emptyStar={require('../assets/image.png')}
+              fullStar={require('../assets/image.png')}
+          />
+          <Text className="text-xl font-bold text-gray-300">
+              {game.title}
+          </Text>
+          <View className="flex-row items-center space-x-2">
+              <ArrowDownTrayIcon size="18" color="lightgray" />
+              <Text className="text-sm text-gray-300 font-semibold">
+                  {game.downloads} Downloads
+              </Text>
+          </View>
+      </View>
+    </LinearGradient>
+  </View>
+)
+}
 
 
-
+const SearchBar = ({ searchQuery, setSearchQuery }) => {
+  return (
+        <TextInput 
+          style={styles.searchbar}
+          placeholder="Search for a product"
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          placeholderTextColor="grey"
+        />
+  );
+};
 
 const Mainpage = () => {
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const { loading, error, searchResult, handleSearch } = UseSearchHandler();
 
+  const [products, setProducts] = useState([]);
+  const [loadingProducts, setLoadingProducts] = useState(true);
+  const [productsError, setProductsError] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
   let [fontsLoaded] = useFonts({ 'CustomFont': require('../assets/fonts/Ubuntu-Regular.ttf'), });
-  
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await fetchProducts();
         setProducts(response.products_data);
-      } catch (err) {
-        console.error('Error fetching products:', err);
-        setError(err);
+      } catch (error) {
+        console.error('Error fetching products:', error);
+        setProductsError(error);
       } finally {
-        setLoading(false);
+        setLoadingProducts(false);
       }
     };
-
     fetchData();
-  }, []);
+  }, []); // Empty dependency array means this runs once when the component mounts
+  
+  const navigation = useNavigation();
+  const handleSearchButtonPress = useCallback(async () => {
+    const result = await handleSearch(searchQuery);
+    if(result){
+    navigation.navigate('SearchResultScreen', { searchResult: result });
+    console.log('Navigating to SearchResultScreen with data:', result);
+    }else{
+      console.log('No search results found');
+    }
+  }, [handleSearch, searchQuery, navigation]);
 
-  const colors = ['rgba(0, 0, 0, 0.5)', 'rgba(0, 60, 180, 0.4)' ,'rgba(108, 0, 0, 0.7)','rgba(128, 99, 195, 0.4)', ];
-  const renderItem = ({ item, index }) => (
-    <View style={styles.productItem}>
-      <Image source={{ uri: item.image }} style={styles.productImage} />
-      <View style={[styles.overlay, { backgroundColor: colors[index % colors.length] }]} />
-      <Text style={styles.productTitle}>{item.name}</Text>
-      <Text style={styles.productPrice}>${item.price}</Text>
-    </View>
-  );
+  const renderItem = useCallback(({ item, index }) => {
+    const colors = ['rgba(0, 0, 0, 0.5)', 'rgba(0, 60, 180, 0.4)', 'rgba(108, 0, 0, 0.7)', 'rgba(128, 99, 195, 0.4)'];
+    return (
+      <View style={styles.productItem}>
+        <Image source={{ uri: item.image }} style={styles.productImage} />
+        <View style={[styles.overlay, { backgroundColor: colors[index % colors.length] }]} />
+        <Text style={styles.productTitle}>{item.name}</Text>
+        <Text style={styles.productPrice}>${item.price}</Text>
+      </View>
+    );
+  },[]);
 
-
-  if (loading) {
+  if (loadingProducts) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#0000ff" />
@@ -81,10 +226,10 @@ const Mainpage = () => {
     );
   }
 
-  if (error) {
+  if (productsError) {
     return (
       <View style={styles.loadingContainer}>
-        <Text>Error loading products: {error.message}</Text>
+        <Text>Error loading products: {productsError.message}</Text>
       </View>
     );
   }
@@ -93,54 +238,68 @@ const Mainpage = () => {
     return null;
   }
 
-  return (<View style={styles.gradientContainer}>
-    <LinearGradient 
-      colors={['black', '#531889']} 
-      style={styles.LinearGradient} 
-      start={{ x: 0, y: 1 }} 
-      end={{ x: 1, y: 0 }}
-    >
-      <View style={styles.top_div}>
-        <Text style={styles.first_phrase}>Compare everything & anything</Text>
-        <Text style={styles.suggests_phrase}>Whats it gonna be? A smartphone, watch, TV?</Text>
-      </View>
-      <View style={styles.waveContainer}>
-        <Wave />
-      </View>
-    </LinearGradient>
-    <FlatList
-      data={products}
-      renderItem={renderItem}
-      keyExtractor={(item) => item._id}
-      ListHeaderComponent={() => (
-        <View>
-          {/* Your non-list content */}
-          <LinearGradient 
-            colors={['black', '#531889']} 
-            style={styles.LinearGradient} 
-            start={{ x: 0, y: 1 }} 
-            end={{ x: 1, y: 0 }}
-          >
-            <View style={styles.top_div}>
-              <Text style={styles.first_phrase}>Compare everything & anything</Text>
-              <Text style={styles.suggests_phrase}>Whats it gonna be? A smartphone, watch, TV?</Text>
-            </View>
-            <View style={styles.waveContainer}>
-              <Wave />
-            </View>
-          </LinearGradient>
-        </View>
-      )}
-      contentContainerStyle={styles.flatListContainer}
-    />
-  </View>
-  
+  return (
+    <View style={styles.gradientContainer}>
+      <FlatList
+        data={products}
+        renderItem={renderItem}
+        keyExtractor={(item) => item._id}
+        ListHeaderComponent={() => (
+          <View>
+            <LinearGradient 
+              colors={['black', '#531889']} 
+              style={styles.LinearGradient} 
+              start={{ x: 0, y: 1 }} 
+              end={{ x: 1, y: 0 }}
+            >
+              <View style={styles.top_div}>
+                                                                                                                                                                   
+                <Text style={styles.first_phrase}>Compare everything & anything</Text>
+                <Text style={styles.suggests_phrase}>Whats it gonna be? A smartphone, watch, TV?</Text>
+                
+                {/* <KeyboardAvoidingView behavior={Platform.OS === "ios"? "padding" : "height"} style={styles.keyboardAvoidingView}> */}
+                  <View>
+                    <SearchBar 
+                      searchQuery={searchQuery} 
+                      setSearchQuery={setSearchQuery} 
+                    />
+                    <TouchableOpacity style={styles.searchbutton} onPress={handleSearchButtonPress}>
+                      <Text style={styles.searchbuttontext}>Search</Text>
+                    </TouchableOpacity>
+
+
+                    {/* testing new things */}
+                    <View className="pl-4">
+                        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                          {
+                            featured.map((item, index)=>{
+                              return (
+                                <GameCard key={index} game={item} />
+                              )
+                            })
+                          }
+                        </ScrollView>
+                    </View>
+                    
+
+
+                  </View>
+
+                {/* </KeyboardAvoidingView> */}
+              </View>
+              <View style={styles.waveContainer}>
+                <Wave />
+              </View>
+            </LinearGradient>
+          </View>
+        )}
+        contentContainerStyle={styles.flatListContainer}
+      />
+    </View>
   );
 };
 
-
 export default Mainpage;
-
 const styles = StyleSheet.create({
   gradientContainer: {
     flexDirection: 'column',
@@ -150,14 +309,9 @@ const styles = StyleSheet.create({
     fontFamily: 'CustomFont',
   },
 
-  ScrollViewcCntent: {
-    flexDirection: 'column',
-    flexGrow: 1,
-  },
-
   LinearGradient: {
     flex: 1,
-    height: 700,
+    height:850,
   },
 
   top_div: {
@@ -166,20 +320,64 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     margin: 10,
+    paddingBottom:'50%',
+
     flexShrink: 1,
   },
 
   first_phrase: {
     color: 'white',
     fontFamily: 'CustomFont',
-    fontSize: 35,
+    fontSize: 30,
   },
 
   suggests_phrase: {
     fontFamily: 'CustomFont',
     color: 'white',
+  }, 
+  searchbar:{
+    backgroundColor: 'white',
+    width: 350,
+    borderRadius:50,
+    fontFamily:'CustomFont',
+    fontSize: 15,
+    marginTop:10,
+    color:'black',
+    padding:10,
+    shadowColor : 'rgba(219, 170, 255, 1)',
+    shadowOffset   :{
+      width : 0 ,
+      height : 10 , 
+    },
+    shadowOpacity : 0.3,
+    shadowRadius : 3.5,
+    elevation : 5 ,
   },
 
+  searchbutton: {
+    width: 200,
+    borderRadius:50,
+    fontSize: 15,
+    marginTop:10,
+    
+    backgroundColor:'rgba(40, 13, 58, 0.76)',
+    padding:10,
+    shadowColor : 'rgba(219, 170, 255, 1)',
+    shadowOffset   :{
+      width : 0 ,
+      height : 10 , 
+    },
+    shadowOpacity : 0.3,
+    shadowRadius : 3.5,
+    elevation : 5 ,
+    alignItems: 'center',
+    justifyContent: 'center',
+   },
+
+   searchbuttontext:{
+    fontFamily:'CustomFont',
+    color:'white',
+   },
 
   transparent_svg: {
     opacity: 0.2,
@@ -256,4 +454,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  keyboardAvoidingView:{
+    flex:1,
+  }
+  
 });

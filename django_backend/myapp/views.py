@@ -1,10 +1,9 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from rest_framework import serializers
-from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from .mongo_utils import get_mongo_connection  # Import the MongoDB utility
-
+from rest_framework import serializers
+from django.http import HttpResponse
 
 from django.shortcuts import render, redirect
 from django.contrib.auth import login
@@ -19,12 +18,9 @@ from rest_framework import status
 
 from rest_framework import viewsets
 from .models import Product, Category, Order, OrderItem, UserProfile
-from .serializers import ProductSerializer, CategorySerializer, OrderSerializer, OrderItemSerializer, UserProfileSerializer
+from .serializers import ProductSerializer, CategorySerializer, OrderSerializer, OrderItemSerializer, UserProfileSerializer ,CartSerializer
 import logging
 
-from django.contrib.auth.views import LoginView
-from django.contrib import messages
-from django.urls import reverse_lazy
 from django.contrib.auth.decorators import login_required
 
 from rest_framework.views import APIView
@@ -32,13 +28,32 @@ from rest_framework.response import Response
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 
-
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import update_session_auth_hash
-
+from django.http import JsonResponse
+import json
 from django.http import JsonResponse
 
+from .models import Cart
 
+
+
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework import serializers
+from django.http import HttpResponse
+from django.contrib.auth.decorators import login_required
+from .mongo_utils import get_mongo_connection  # Import the MongoDB utility
+
+
+from django.shortcuts import render, redirect
+from django.contrib.auth import login
+ 
+from django.contrib.auth.views import LoginView
+from django.contrib import messages
+from django.urls import reverse_lazy
+  
+ 
 @login_required
 def home(request):
     return render(request, 'home.html')
@@ -46,7 +61,6 @@ def home(request):
 @login_required
 def profile(request):
     return render(request, 'profile.html')
-
 
 @api_view(['GET'])
 def list_mongo_products(request):
@@ -57,7 +71,6 @@ def list_mongo_products(request):
     for product in products:
         product["_id"] = str(product["_id"])
     return Response({'products_data': products})
-
 
 @api_view(['POST'])
 def add_mongo_product(request):
@@ -76,7 +89,6 @@ def add_mongo_product(request):
         # Log any exceptions that occur during the insertion process
         logging.error(f"An error occurred while inserting a product into MongoDB: {e}")
         return Response({'error': 'Internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
 
 # Viewsets handle the logic of typical API endpoints like listing all instances, retrieving one instance, updating, and deleting.
 class ProductViewSet(viewsets.ModelViewSet):
@@ -123,8 +135,6 @@ class UserProfileViewSet(viewsets.ModelViewSet):
         logger.debug(f"Response data: {response.data}")
         return response
 
-from django.contrib.auth import get_user_model
-from .serializers import UserSerializer
 class UserProfileView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -227,53 +237,78 @@ class ChangePasswordView(APIView):
             return Response({'message': 'Password changed successfully'})
         return Response({'error': 'Wrong old password'}, status=400)
 
+# views.py
+@api_view(['POST'])
+def search_product(request):
+    data = json.loads(request.body)
+    product_name = data.get('searchQuery')
+    
+    if not product_name:
+        return Response({'error': 'Product name is required'}, status=400)
+    
+    db = get_mongo_connection()
+    fake_product_collection = db.product_collection
+    avito_products_collection = db.avito_products_collection
+    jumia_products_collection = db.jumia_products_collection
+    electroplanet_products_collection=db.electroplanet_products_collection
+    # Check if the product already exists in the database
+    # existing_product = product_collection.find_one({'name': product_name})
+    # Use regex for partial matching
+    regex = {'$regex': product_name, '$options': 'i'}  # 'i' for case-insensitive
+
+    avito_products = avito_products_collection.find_one({'name': regex})
+    jumia_products = jumia_products_collection.find_one({'name': regex})
+    electroplanet_products = electroplanet_products_collection.find_one({'name': regex})
+    
+    if (avito_products ,jumia_products,electroplanet_products):
+        avito_products['_id'] = str(avito_products['_id'])
+        jumia_products['_id'] = str(jumia_products['_id'])
+        electroplanet_products['_id'] = str(electroplanet_products['_id'])
+        
+        results ={
+            'avito_products': avito_products if avito_products else 'No resluts from avito',
+            'jumia_products': jumia_products if jumia_products else 'No results from jumia',
+            'electroplanet_products': electroplanet_products if electroplanet_products else 'No results from electroplanet',
+        }
+
+        # Convert MongoDB ObjectIds to strings  
+        for key, product in results.items():
+            if isinstance(product, dict) and '_id' in product:
+                product['_id'] = str(product['_id'])
+
+        return Response({'status':'success' , 'data':results } , status = 200 )    
+
+    # if existing_product:
+    #     # Convert _id to a string before sending the response
+    #     existing_product['_id'] = str(existing_product['_id'])
+    #     return Response({'status': 'success', 'data': existing_product}, status=200)
+    
+    else:
+        # Simulate fetching data from an external API
+        fake_api_data = {
+            'name': product_name,
+            'description': 'This is a fake product description.',
+            'price': 99.99,
+            'image': 'http://example.com/fake_image.png',
+        }
+        
+        # Save the fake data to MongoDB
+        result = fake_product_collection.insert_one(fake_api_data)
+        
+        if result.inserted_id:
+            # Convert _id to a string before sending the response
+            fake_api_data['_id'] = str(result.inserted_id)
+            return Response({'status': 'success', 'data': fake_api_data}, status=201)
+        else:
+            return Response({'status': 'fail', 'message': 'Failed to save data to MongoDB'}, status=500)
 
 
+class  CartViewSet(viewsets.ModelViewSet):
+    serializer_class = CartSerializer
+    permission_classes = [IsAuthenticated]
 
+    def get_queryset(self):
+        return Cart.objects.filter(user=self.request.user)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# @api_view([ 'GET']) #the user can only GET this data 
-# def get_products(request):
-#   products_data =[
-#     {
-#       "id": 1,
-#       "name": "T-Shirt",
-#       "description": "A comfortable and stylish T-Shirt",
-#       "price": 19.99,
-#       "image": "https://example.com/images/t-shirt.jpg"
-#     },
-#     {
-#       "id": 2,
-#       "name": "Laptop",
-#       "description": "A powerful laptop for all your needs",
-#       "price": 799.99,
-#       "image": "https://example.com/images/laptop.jpg"
-#     },
-#     {
-#       "id": 3,
-#       "name": "Headphones",
-#       "description": "Noise-canceling headphones for immersive sound",
-#       "price": 99.99,
-#       "image": "https://example.com/images/headphones.jpg"
-#     }
-#   ]
-
-#   # Return the data as a JSON response
-#   return Response(products_data)
-   
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)

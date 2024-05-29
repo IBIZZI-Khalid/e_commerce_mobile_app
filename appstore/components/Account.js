@@ -1,10 +1,8 @@
 import {login , register, updateUsername , changePassword,getUserDetails} from './Api';
 import React, { useState, useEffect } from 'react';
-import { TextInput, StyleSheet, View, Text, Button, Alert ,ActivityIndicator} from 'react-native';
+import { TextInput, StyleSheet, View, Text, Button, Alert } from 'react-native';
 import { createStackNavigator } from '@react-navigation/stack';
-import { NavigationContainer } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import axios from 'axios';
 
 const LoginScreen = ({ navigation }) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -27,13 +25,11 @@ const LoginScreen = ({ navigation }) => {
       } else {
         // Handle login failure
         alert('Login failed. Please check your credentials.');
-
       }
-    } catch (error) {
-      // Handle error
+    }catch(error){
       console.error(error);
       alert('An error occurred. Please try again later.',error.message);
-    } finally{
+    }finally{
       setIsLoading(false); // Hide the loading thing 
     }
   };
@@ -56,8 +52,8 @@ const LoginScreen = ({ navigation }) => {
 
       />
 
-      <Button title='Log In' onPress={handleLogin}/>
-      <Button title='Dont have an account ? Sign Up !' onPress={()=> navigation.navigate('Signup')}/>
+      <Button title='Log In' onPress={handleLogin} style={styles.login_button}/>
+      <Button title='Dont have an account ? Sign Up !' style={styles.login_button} onPress={()=> navigation.navigate('Signup')}/>
       
 
     </View>
@@ -226,66 +222,6 @@ const UserProfile =({navigation})=> {
     </View>
   );
 };
-
- 
-
-
-// const AccountDetailsScreen = ({ navigation }) => {
-//   const [username, setUsername] = useState('');
-//   const [email, setEmail] = useState('');
-
-//   useEffect(() => {
-//     const fetchUserDetails = async () => {
-//       try {
-//         console.log('fetching user details...');
-//         const data = await getUserDetails();
-//         console.log('user details fetched:', data);
-
-//         setUsername(data.user.username);
-//         setEmail(data.user.email);
-//       } catch (error) {
-//         console.log('error while fetching the details : ',error);
-//         Alert.alert('Error', error.response?.data?.error || error.message);
-//       }
-//     };
-
-//     fetchUserDetails();
-//   }, []);
-
-//   return (
-//     <View style={styles.container}>
-//       <Text>Account Details</Text>
-//       <Text>Username: {username}</Text>
-//       <Text>Email: {email}</Text>
-
-//       <Button title="Edit Details" onPress={() => navigation.navigate('EditAccountDetails')} />
-//     </View>
-//   );
-// };
- 
-
-// const UserProfileScreen = () => {
-//   const [userData, setUserData] = useState(null);
-
-//   useEffect(() => {
-//     axios.get('http://localhost:8000/api/user')
-//       .then(response => setUserData(response.data));
-//   }, []);
-
-//   if (!userData) {
-//     return <Text>Loading...</Text>;
-//   }
-
-//   return (
-//     <View>
-//       <Text>{userData.username}</Text>
-//       <Text>{userData.email}</Text>
-//       // display other user data...
-//     </View>
-//   );
-// };
-
- 
  
 const styles = StyleSheet.create({
   container: {
@@ -316,9 +252,7 @@ const AccountNavigator =() =>{
     <AccountStack.Navigator initialRouteName='Login'>
       <AccountStack.Screen name='Login' component={LoginScreen} />
       <AccountStack.Screen name='Signup' component={SignupScreen} />
-      {/* <AccountStack.Screen name='AccountDetails' component={AccountDetailsScreen} /> */}
       <AccountStack.Screen name='AccountDetails' component={UserProfile} />
-
       <AccountStack.Screen name='EditAccountDetails' component={EditAccountScreen} />
     </AccountStack.Navigator>
   )
