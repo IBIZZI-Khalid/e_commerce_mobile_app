@@ -47,43 +47,6 @@ const featured = [
   },
 ]
 
-const games = [
-  {
-      id: 1,
-      title: 'Shadow Fight',
-      image: require('../assets/Rappi.jpeg'),
-      downloads: '20M',
-      stars: 4.5
-  },
-  {
-      id: 2,
-      title: 'Valor Arena',
-      image: require('../assets/Rappi.jpeg'),
-      downloads: '10k',
-      stars: 3.4
-  },
-  {
-      id: 3,
-      title: 'Frag',
-      image: require('../assets/Rappi.jpeg'),
-      downloads: '80k',
-      stars: 4.6
-  },
-  {
-      id: 4,
-      title: "Zooba Wildlife",
-      image: require('../assets/Rappi.jpeg'),
-      downloads: '40k',
-      stars: 3.5
-  },
-  {
-      id: 4,
-      title: "Clash of Clans",
-      image: require('../assets/Rappi.jpeg'),
-      downloads: '20k',
-      stars: 4.2
-  },
-];
 
 const Wave = memo(() => (
   <View>
@@ -114,49 +77,98 @@ const Wave = memo(() => (
   </View>
 ));
 
-import { ArrowDownTrayIcon, HeartIcon } from 'react-native-heroicons/solid'
-import StarRating from 'react-native-star-rating';
+// import { ArrowDownTrayIcon, HeartIcon } from 'react-native-heroicons/solid'
+// import StarRating from 'react-native-star-rating';
+// function GameCard({game}) {
+//   const [isFavourite, setFavourite] = useState(false);
+// return (
+//   <View className="mr-4 relative">
+//     <Image source={game.image} className="w-80 h-60 rounded-3xl"/>
+//     <LinearGradient colors={['transparent', 'rgba(0, 0, 0, 0.6)']} 
+//       className="absolute p-4 h-full w-full flex justify-between rounded-3xl">
+//       {/* <View className="flex-row justify-end">
+//           <TouchableOpacity
+//               onPress={()=> setFavourite(!isFavourite)}
+//               className="p-3 rounded-full"
+//               style={{backgroundColor: 'rgba(255,255,255,0.3)'}}
+//           >
+//               <HeartIcon size="25" color={isFavourite? storeColors.redHeart: 'white'} />
+//           </TouchableOpacity>
+//       </View> */}
+//       <View className="space-y-1">
+//           {/* <StarRating
+//               disabled={true}
+//               starSize={15}
+//               containerStyle={{width: 90}}
+//               maxStars={5}
+//               rating={game.stars}
+//               emptyStar={require('../assets/image.png')}
+//               fullStar={require('../assets/image.png')}
+//           /> */}
+//           <Text className="text-xl font-bold text-gray-300">
+//               {game.title}
+//           </Text>
+//           <View className="flex-row items-center space-x-2">
+//               {/* <ArrowDownTrayIcon size="18" color="lightgray" /> */}
+//               <Text className="text-sm text-gray-300 font-semibold">
+//                   {game.downloads} Downloads
+//               </Text>
+//           </View>
+//       </View>
+//     </LinearGradient>
+//   </View>
+// )
+// }
 
-function GameCard({game}) {
+function GameCard({ game }) {
   const [isFavourite, setFavourite] = useState(false);
-return (
-  <View className="mr-4 relative">
-    <Image source={game.image} className="w-80 h-60 rounded-3xl"/>
-    <LinearGradient colors={['transparent', 'rgba(0, 0, 0, 0.6)']} 
-      className="absolute p-4 h-full w-full flex justify-between rounded-3xl">
-      <View className="flex-row justify-end">
+
+  const renderStars = (rating) => {
+    const stars = [];
+    for (let i = 1; i <= 5; i++) {
+      stars.push(
+        <Text key={i} style={{ color: i <= rating ? 'gold' : 'grey' }}>★</Text>
+      );
+    }
+    return stars;
+  };
+
+  return (
+    <View style={styles.parentviewcard}>
+      <Image source={game.image} style={styles.Cardimg} />
+      <LinearGradient colors={['transparent', 'rgba(0, 0, 0, 0.6)']} style={styles.Cardbackground}>
+       
+        
+        <View style={styles.Cardrow}>
           <TouchableOpacity
-              onPress={()=> setFavourite(!isFavourite)}
-              className="p-3 rounded-full"
-              style={{backgroundColor: 'rgba(255,255,255,0.3)'}}
+            onPress={() => setFavourite(!isFavourite)}
+            style={styles.hearticon}
           >
-              {/* <HeartIcon size="25" color={isFavourite? storeColors.redHeart: 'white'} /> */}
+            <Text style={{ fontSize: 25, color: isFavourite ? 'red' : 'white' }}>
+              {isFavourite ? '❤️' : '🤍'}
+            </Text>
           </TouchableOpacity>
-      </View>
-      <View className="space-y-1">
-          <StarRating
-              disabled={true}
-              starSize={15}
-              containerStyle={{width: 90}}
-              maxStars={5}
-              rating={game.stars}
-              emptyStar={require('../assets/image.png')}
-              fullStar={require('../assets/image.png')}
-          />
-          <Text className="text-xl font-bold text-gray-300">
-              {game.title}
-          </Text>
-          <View className="flex-row items-center space-x-2">
-              <ArrowDownTrayIcon size="18" color="lightgray" />
-              <Text className="text-sm text-gray-300 font-semibold">
-                  {game.downloads} Downloads
-              </Text>
+        </View>
+
+        <View style={{ marginVertical: 8 }}>
+          <View style={{ flexDirection: 'row' }}>
+            {renderStars(game.stars)}
           </View>
-      </View>
-    </LinearGradient>
-  </View>
-)
+          <Text style={{ fontSize: 20, fontWeight: 'bold', color: 'lightgray' }}>
+            {game.title}
+          </Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 4 }}>
+            <Text style={{ fontSize: 18, color: 'lightgray' }}>⬇️</Text>
+            <Text style={{ fontSize: 14, fontWeight: '600', color: 'lightgray', marginLeft: 8 }}>
+              {game.downloads} Downloads
+            </Text>
+          </View>
+        </View>
+      </LinearGradient>
+    </View>
+  );
 }
+
 
 
 const SearchBar = ({ searchQuery, setSearchQuery }) => {
@@ -456,6 +468,35 @@ const styles = StyleSheet.create({
   },
   keyboardAvoidingView:{
     flex:1,
-  }
-  
+  },
+  parentviewcard:{
+    marginRight: 16, 
+    position: 'relative' 
+  },
+
+  Cardimg:{ 
+    width: 320,
+    height: 240,
+    borderRadius: 24 
+  },
+
+    Cardbackground:{ 
+      position: 'absolute', 
+      padding: 16, 
+      height: '100%', 
+      width: '100%', 
+      justifyContent: 'space-between', 
+      borderRadius: 24 
+    },
+
+    Cardrow:{ 
+      flexDirection: 'row', 
+      justifyContent: 'flex-end'
+    },
+    
+    hearticon:{ 
+      padding: 12, 
+      borderRadius: 50,
+      backgroundColor: 'rgba(255,255,255,0.3)' 
+    }
 });
