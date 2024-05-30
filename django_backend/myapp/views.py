@@ -65,12 +65,33 @@ def profile(request):
 @api_view(['GET'])
 def list_mongo_products(request):
     db = get_mongo_connection()
-    products = list(db.product_collection.find({}, {"_id": 1, "name": 1, "description": 1, "price": 1, "image": 1}))  # Exclude _id field
+    products = list(db.product_collection.find({}, {"_id": 1, "name": 1, "description": 1, "price": 1, "image": 1}))  
     
     #converting object id to a string 
     for product in products:
         product["_id"] = str(product["_id"])
     return Response({'products_data': products})
+
+@api_view(['GET'])
+def list_categories(request):
+    db = get_mongo_connection()
+    categories = list(db.categories_collection.find({}, {"_id": 1, "name": 1, "description": 1, "image": 1}))  
+    
+    #converting object id to a string 
+    for cat in categories:
+        cat["_id"] = str(cat["_id"])
+    return Response({'categories_data': categories})
+
+@api_view(['GET' , 'POST'])
+def list_category_products(request):
+    db = get_mongo_connection()
+    products = list(db.category_screen.find({}, {"_id": 1, "name": 1,"price" :1, "image": 1}))  
+    
+    #converting object id to a string 
+    for product in products:
+        product["_id"] = str(product["_id"])
+    return Response({'category_products': products})
+
 
 @api_view(['POST'])
 def add_mongo_product(request):

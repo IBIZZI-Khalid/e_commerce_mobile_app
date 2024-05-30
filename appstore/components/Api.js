@@ -7,7 +7,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // const BASE_URL = 'http://192.168.11.241:8000/';
 // const BASE_URL = 'http://192.168.11.69:8000/'
 // const BASE_URL = 'http://192.168.100.150:8000/'
-const BASE_URL = 'http://192.168.100.109:8000/';
+const BASE_URL = 'http://192.168.0.100:8000/';
 
 const apiClient = axios.create({
   baseURL: BASE_URL,
@@ -29,6 +29,26 @@ export const fetchProducts = async () => {
     };
   }
 
+export const fetchcategories = async () => { 
+    try{
+      const response = await apiClient.get(`/categories/`);
+      return response.data;                       
+    } catch(error){
+      console.log('api.js : error fetching the categories ', error.message);
+      throw error; 
+    };
+  }
+
+
+  export const fetchcategoryproducts = async () => { 
+    try{
+      const response = await apiClient.get(`/category_products/`);
+      return response.data;                       
+    } catch(error){
+      console.log('api.js : error fetching the categories ', error.message);
+      throw error; 
+    };
+  }
 
 export const login = async (username, password) => {
   try {

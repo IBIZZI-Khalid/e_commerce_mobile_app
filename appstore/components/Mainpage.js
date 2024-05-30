@@ -5,14 +5,12 @@ import { StyleSheet,
     TextInput,TouchableOpacity,
     ScrollView, 
     Platform} from 'react-native';
-import { fetchProducts } from './Api';
+import { fetchProducts , fetchcategories } from './Api';
 import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Path } from 'react-native-svg';
 import { useFonts } from 'expo-font';
 import UseSearchHandler from './Search.js';
 import { useNavigation } from '@react-navigation/native';
-import SearchResultScreen from './SearchResultScreen.js';
-import { SafeAreaView } from 'react-native-safe-area-context'
 
 const categories = ['Action', 'Family', 'Puzzle', 'Adventure', 'Racing', 'Education', 'Others'];
 const featured = [
@@ -77,69 +75,16 @@ const Wave = memo(() => (
   </View>
 ));
 
-// import { ArrowDownTrayIcon, HeartIcon } from 'react-native-heroicons/solid'
-// import StarRating from 'react-native-star-rating';
-// function GameCard({game}) {
-//   const [isFavourite, setFavourite] = useState(false);
-// return (
-//   <View className="mr-4 relative">
-//     <Image source={game.image} className="w-80 h-60 rounded-3xl"/>
-//     <LinearGradient colors={['transparent', 'rgba(0, 0, 0, 0.6)']} 
-//       className="absolute p-4 h-full w-full flex justify-between rounded-3xl">
-//       {/* <View className="flex-row justify-end">
-//           <TouchableOpacity
-//               onPress={()=> setFavourite(!isFavourite)}
-//               className="p-3 rounded-full"
-//               style={{backgroundColor: 'rgba(255,255,255,0.3)'}}
-//           >
-//               <HeartIcon size="25" color={isFavourite? storeColors.redHeart: 'white'} />
-//           </TouchableOpacity>
-//       </View> */}
-//       <View className="space-y-1">
-//           {/* <StarRating
-//               disabled={true}
-//               starSize={15}
-//               containerStyle={{width: 90}}
-//               maxStars={5}
-//               rating={game.stars}
-//               emptyStar={require('../assets/image.png')}
-//               fullStar={require('../assets/image.png')}
-//           /> */}
-//           <Text className="text-xl font-bold text-gray-300">
-//               {game.title}
-//           </Text>
-//           <View className="flex-row items-center space-x-2">
-//               {/* <ArrowDownTrayIcon size="18" color="lightgray" /> */}
-//               <Text className="text-sm text-gray-300 font-semibold">
-//                   {game.downloads} Downloads
-//               </Text>
-//           </View>
-//       </View>
-//     </LinearGradient>
-//   </View>
-// )
-// }
-
 function GameCard({ game }) {
   const [isFavourite, setFavourite] = useState(false);
 
-  const renderStars = (rating) => {
-    const stars = [];
-    for (let i = 1; i <= 5; i++) {
-      stars.push(
-        <Text key={i} style={{ color: i <= rating ? 'gold' : 'grey' }}>★</Text>
-      );
-    }
-    return stars;
-  };
-
   return (
     <View style={styles.parentviewcard}>
-      <Image source={game.image} style={styles.Cardimg} />
-      <LinearGradient colors={['transparent', 'rgba(0, 0, 0, 0.6)']} style={styles.Cardbackground}>
+      <Image source={{uri: game.image}} style={styles.Cardimg} />
+      <LinearGradient colors={['transparent', 'rgba(0, 0, 0, 0.7)']} style={styles.Cardbackground}>
        
         
-        <View style={styles.Cardrow}>
+        {/* <View style={styles.Cardrow}>
           <TouchableOpacity
             onPress={() => setFavourite(!isFavourite)}
             style={styles.hearticon}
@@ -148,27 +93,29 @@ function GameCard({ game }) {
               {isFavourite ? '❤️' : '🤍'}
             </Text>
           </TouchableOpacity>
-        </View>
+        </View> */}
 
         <View style={{ marginVertical: 8 }}>
-          <View style={{ flexDirection: 'row' }}>
+          {/* <View style={{ flexDirection: 'row' }}>
             {renderStars(game.stars)}
-          </View>
+          </View> */}
+
           <Text style={{ fontSize: 20, fontWeight: 'bold', color: 'lightgray' }}>
-            {game.title}
+            {game.name}
           </Text>
-          <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 4 }}>
+
+
+          {/* <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 4 }}>
             <Text style={{ fontSize: 18, color: 'lightgray' }}>⬇️</Text>
             <Text style={{ fontSize: 14, fontWeight: '600', color: 'lightgray', marginLeft: 8 }}>
               {game.downloads} Downloads
             </Text>
-          </View>
+          </View> */}
         </View>
       </LinearGradient>
     </View>
   );
 }
-
 
 
 const SearchBar = ({ searchQuery, setSearchQuery }) => {
@@ -183,10 +130,13 @@ const SearchBar = ({ searchQuery, setSearchQuery }) => {
   );
 };
 
+
 const Mainpage = () => {
   const { loading, error, searchResult, handleSearch } = UseSearchHandler();
 
   const [products, setProducts] = useState([]);
+  const [categories, setcategories] = useState([]);
+
   const [loadingProducts, setLoadingProducts] = useState(true);
   const [productsError, setProductsError] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -207,6 +157,22 @@ const Mainpage = () => {
     fetchData();
   }, []); // Empty dependency array means this runs once when the component mounts
   
+  useEffect(() => {
+    const fetchCategoriesData = async () => {
+      try {
+        const response = await fetchcategories();
+        setcategories(response.categories_data);
+      } catch (error) {
+        console.error('Error fetching products:', error);
+        setProductsError(error);
+      } finally {
+        setLoadingProducts(false);
+      }
+    };
+    fetchCategoriesData();
+  }, []);
+
+
   const navigation = useNavigation();
   const handleSearchButtonPress = useCallback(async () => {
     const result = await handleSearch(searchQuery);
@@ -249,65 +215,73 @@ const Mainpage = () => {
   if (!fontsLoaded) {
     return null;
   }
-
   return (
+    <ScrollView vertical showsVerticalScrollIndicato={false} >
     <View style={styles.gradientContainer}>
-      <FlatList
-        data={products}
-        renderItem={renderItem}
-        keyExtractor={(item) => item._id}
-        ListHeaderComponent={() => (
-          <View>
-            <LinearGradient 
-              colors={['black', '#531889']} 
-              style={styles.LinearGradient} 
-              start={{ x: 0, y: 1 }} 
-              end={{ x: 1, y: 0 }}
-            >
-              <View style={styles.top_div}>
-                                                                                                                                                                   
-                <Text style={styles.first_phrase}>Compare everything & anything</Text>
-                <Text style={styles.suggests_phrase}>Whats it gonna be? A smartphone, watch, TV?</Text>
-                
-                {/* <KeyboardAvoidingView behavior={Platform.OS === "ios"? "padding" : "height"} style={styles.keyboardAvoidingView}> */}
-                  <View>
-                    <SearchBar 
-                      searchQuery={searchQuery} 
-                      setSearchQuery={setSearchQuery} 
-                    />
-                    <TouchableOpacity style={styles.searchbutton} onPress={handleSearchButtonPress}>
-                      <Text style={styles.searchbuttontext}>Search</Text>
-                    </TouchableOpacity>
-
-
-                    {/* testing new things */}
-                    <View className="pl-4">
-                        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                          {
-                            featured.map((item, index)=>{
-                              return (
-                                <GameCard key={index} game={item} />
-                              )
-                            })
-                          }
-                        </ScrollView>
-                    </View>
-                    
-
-
-                  </View>
-
-                {/* </KeyboardAvoidingView> */}
-              </View>
-              <View style={styles.waveContainer}>
-                <Wave />
-              </View>
-            </LinearGradient>
+      <LinearGradient
+        colors={['black', '#531889']}
+        style={styles.LinearGradient}
+        start={{ x: 0, y: 1 }}
+        end={{ x: 1, y: 0 }}
+      >
+        <View style={styles.top_div}>
+        
+          {/* attention to the big phrases */}
+          <Text style={styles.first_phrase}>Compare everything & anything</Text>
+          <Text style={styles.suggests_phrase}>Whats it gonna be? A smartphone, watch, TV?</Text>
+         
+         
+          {/* searchpart */}
+          <View style={styles.searchview}>
+            <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+            <TouchableOpacity style={styles.searchbutton} onPress={handleSearchButtonPress}>
+              <Text style={styles.searchbuttontext}>Search</Text>
+            </TouchableOpacity>
           </View>
-        )}
-        contentContainerStyle={styles.flatListContainer}
-      />
+        
+        </View>
+
+        {/* waves coming !! */}
+        <View style={styles.waveContainer}>
+          <Wave />
+        </View>
+      
+      
+      </LinearGradient>
+
+      <View style={styles.footerContainer}>
+        <Text style={styles.Categoriestext}>Categories</Text>
+        
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            {categories.map((item, index) => (
+              <TouchableOpacity
+                key={index}
+                onPress={() => navigation.navigate('CategoryScreen', { category: item.name})}
+              >
+                <GameCard game={item} />
+              </TouchableOpacity>
+            ))}
+        </ScrollView>   
+        
+
+
+        {/* <Text style={styles.Categoriestext}>Categories</Text>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          {categories.map((item, index) => (
+            <GameCard key={index} game={item} />
+          ))}
+        </ScrollView>
+
+
+        <Text style={styles.Categoriestext}>Categories</Text>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          {categories.map((item, index) => (
+            <GameCard key={index} game={item} />
+          ))}
+        </ScrollView> */}
+      </View>
     </View>
+    </ScrollView>
   );
 };
 
@@ -323,16 +297,17 @@ const styles = StyleSheet.create({
 
   LinearGradient: {
     flex: 1,
-    height:850,
+    minHeight:850,
   },
 
   top_div: {
-    color: 'white',
+    // color: 'white',
     flex: 1,
+    // minHeight :850,
     alignItems: 'center',
     justifyContent: 'center',
     margin: 10,
-    paddingBottom:'50%',
+    // paddingBottom:'50%',
 
     flexShrink: 1,
   },
@@ -365,13 +340,18 @@ const styles = StyleSheet.create({
     shadowRadius : 3.5,
     elevation : 5 ,
   },
-
+  searchview:{
+    flexDirection:'column',
+    padding:5,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   searchbutton: {
     width: 200,
     borderRadius:50,
     fontSize: 15,
     marginTop:10,
-    
+
     backgroundColor:'rgba(40, 13, 58, 0.76)',
     padding:10,
     shadowColor : 'rgba(219, 170, 255, 1)',
@@ -469,15 +449,26 @@ const styles = StyleSheet.create({
   keyboardAvoidingView:{
     flex:1,
   },
+  footerContainer:{ 
+    // paddingBottom: 50,
+    // marginBottom:50,
+  },
+
   parentviewcard:{
-    marginRight: 16, 
-    position: 'relative' 
+    // marginRight: 16, 
+    position: 'relative' ,
+    padding:5,
+   
+    flex:1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 
   Cardimg:{ 
     width: 320,
     height: 240,
-    borderRadius: 24 
+    borderRadius: 24 ,
+
   },
 
     Cardbackground:{ 
@@ -498,5 +489,16 @@ const styles = StyleSheet.create({
       padding: 12, 
       borderRadius: 50,
       backgroundColor: 'rgba(255,255,255,0.3)' 
+    },
+    Categoriestext:{
+      fontSize: 18,
+      fontWeight: 'bold',
+      marginVertical: 10,
+      fontFamily: 'CustomFont',
+      // position: 'absolute',
+      // bottom: 30,
+      left: 10,
+    color: 'black',
+      
     }
 });

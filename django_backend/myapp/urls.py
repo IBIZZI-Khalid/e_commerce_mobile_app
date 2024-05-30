@@ -7,9 +7,10 @@ from .views import (
     OrderItemViewSet , 
     profile ,home ,
     list_mongo_products, 
+    list_categories,
     add_mongo_product ,
     search_product,
-
+list_category_products,
     LoginView,
     SignupView,
     ChangePasswordView,
@@ -24,7 +25,7 @@ from rest_framework_simplejwt.views import TokenRefreshView
 
 router = DefaultRouter()
 router.register(r'products', ProductViewSet)
-router.register(r'categories', CategoryViewSet)
+# router.register(r'categories', CategoryViewSet)
 router.register(r'orders', OrderViewSet)
 router.register(r'orderitems', OrderItemViewSet)
 router.register(r'cart', CartViewSet, basename='cart')
@@ -34,6 +35,9 @@ router.register(r'cart', CartViewSet, basename='cart')
 urlpatterns = [
     path('', include(router.urls)),  # All API endpoints
     path('mongo-products/', list_mongo_products, name='list_mongo_products'),
+    path('categories/', list_categories, name='list_categories'),
+    path('category_products/', list_category_products, name='list_categories'),
+
     path('add-mongo-product/', add_mongo_product, name='add_mongo_product'),
     path('search/', search_product,name='search_product' ),
 

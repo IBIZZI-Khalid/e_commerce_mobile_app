@@ -18,6 +18,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { Asset } from 'expo-asset';
 import SearchResultScreen from './components/SearchResultScreen.js';
 import CartScreen from './components/CartScreen.js';
+import CategoryScreen from './components/CategoryScreen.js';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -145,6 +146,7 @@ export default function App() {
         <Stack.Screen name="Account" component={AccountNavigator} options={{ headerShown: false }} />
         <Stack.Screen name="SearchResultScreen" component={SearchResultScreen}  />
         <Stack.Screen name="CartScreen" component={CartScreen} />
+        <Stack.Screen name="CategoryScreen" component={CategoryScreen} />
         
       </Stack.Navigator>
     </NavigationContainer>
