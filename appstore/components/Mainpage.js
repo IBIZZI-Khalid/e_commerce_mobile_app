@@ -83,34 +83,10 @@ function GameCard({ game }) {
       <Image source={{uri: game.image}} style={styles.Cardimg} />
       <LinearGradient colors={['transparent', 'rgba(0, 0, 0, 0.7)']} style={styles.Cardbackground}>
        
-        
-        {/* <View style={styles.Cardrow}>
-          <TouchableOpacity
-            onPress={() => setFavourite(!isFavourite)}
-            style={styles.hearticon}
-          >
-            <Text style={{ fontSize: 25, color: isFavourite ? 'red' : 'white' }}>
-              {isFavourite ? '❤️' : '🤍'}
-            </Text>
-          </TouchableOpacity>
-        </View> */}
-
         <View style={{ marginVertical: 8 }}>
-          {/* <View style={{ flexDirection: 'row' }}>
-            {renderStars(game.stars)}
-          </View> */}
-
-          <Text style={{ fontSize: 20, fontWeight: 'bold', color: 'lightgray' }}>
+          <Text style={{ fontSize: 20, fontWeight: 'bold', color: 'rgba(255, 255, 255, 0.7)' }}>
             {game.name}
           </Text>
-
-
-          {/* <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 4 }}>
-            <Text style={{ fontSize: 18, color: 'lightgray' }}>⬇️</Text>
-            <Text style={{ fontSize: 14, fontWeight: '600', color: 'lightgray', marginLeft: 8 }}>
-              {game.downloads} Downloads
-            </Text>
-          </View> */}
         </View>
       </LinearGradient>
     </View>
@@ -132,7 +108,7 @@ const SearchBar = ({ searchQuery, setSearchQuery }) => {
 
 
 const Mainpage = () => {
-  const { loading, error, searchResult, handleSearch } = UseSearchHandler();
+  const { handleSearch } = UseSearchHandler();
 
   const [products, setProducts] = useState([]);
   const [categories, setcategories] = useState([]);
@@ -178,7 +154,7 @@ const Mainpage = () => {
     const result = await handleSearch(searchQuery);
     if(result){
     navigation.navigate('SearchResultScreen', { searchResult: result });
-    console.log('Navigating to SearchResultScreen with data:', result);
+    console.log('Navigating from mainpage to SearchResultScreen with data:', result);
     }else{
       console.log('No search results found');
     }
@@ -221,7 +197,7 @@ const Mainpage = () => {
       <LinearGradient
         colors={['black', '#531889']}
         style={styles.LinearGradient}
-        start={{ x: 0, y: 1 }}
+        start={{ x: 0, y: 0.35 }}
         end={{ x: 1, y: 0 }}
       >
         <View style={styles.top_div}>
@@ -246,13 +222,13 @@ const Mainpage = () => {
           <Wave />
         </View>
       
-      
       </LinearGradient>
 
+      {/* footer suggestions */}
       <View style={styles.footerContainer}>
-        <Text style={styles.Categoriestext}>Categories</Text>
+        <Text style={styles.Categoriestext}>Suggestions By Category</Text>
         
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.scrollview}>
             {categories.map((item, index) => (
               <TouchableOpacity
                 key={index}
@@ -263,22 +239,30 @@ const Mainpage = () => {
             ))}
         </ScrollView>   
         
-
-
-        {/* <Text style={styles.Categoriestext}>Categories</Text>
+        <Text style={styles.Categoriestext}>Or Check The Trending Products</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          {categories.map((item, index) => (
-            <GameCard key={index} game={item} />
-          ))}
-        </ScrollView>
-
-
-        <Text style={styles.Categoriestext}>Categories</Text>
+            {products.map((item, index) => (
+              <TouchableOpacity
+                key={index}
+                onPress={() => navigation.navigate('CategoryScreen', { category: item.name})}
+              >
+                <GameCard game={item} />
+              </TouchableOpacity>
+            ))}
+        </ScrollView>  
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          {categories.map((item, index) => (
-            <GameCard key={index} game={item} />
-          ))}
-        </ScrollView> */}
+            {products.map((item, index) => (
+              <TouchableOpacity
+                key={index}
+                onPress={() => navigation.navigate('CategoryScreen', { category: item.name})}
+              >
+                <GameCard game={item} />
+              </TouchableOpacity>
+            ))}
+        </ScrollView>  
+        
+
+        
       </View>
     </View>
     </ScrollView>
@@ -452,12 +436,13 @@ const styles = StyleSheet.create({
   footerContainer:{ 
     // paddingBottom: 50,
     // marginBottom:50,
+    backgroundColor:'white'
   },
 
   parentviewcard:{
-    // marginRight: 16, 
+    
     position: 'relative' ,
-    padding:5,
+    margin:5,
    
     flex:1,
     justifyContent: 'center',
@@ -495,10 +480,14 @@ const styles = StyleSheet.create({
       fontWeight: 'bold',
       marginVertical: 10,
       fontFamily: 'CustomFont',
+      fontFamily:'CustomFont',
       // position: 'absolute',
       // bottom: 30,
       left: 10,
     color: 'black',
       
+    },
+    scrollview:{
+      margin:20
     }
 });

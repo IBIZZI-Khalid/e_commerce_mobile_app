@@ -9,6 +9,7 @@ const SearchResultScreen = ({ route }) => {
   const { searchResult } = route.params;
   const navigation = useNavigation();
   const[ cart , setCart ] =useState([]);
+  console.log('Received search result in SearchResultScreen:', searchResult);
 
   let [fontsLoaded] = useFonts({ 'CustomFont': require('../assets/fonts/Ubuntu-Regular.ttf'), });
 
@@ -43,7 +44,7 @@ const SearchResultScreen = ({ route }) => {
 
 
   // Handle case when there are no search results
-  if (!searchResult) {
+  if (!searchResult || Object.keys(searchResult).length === 0) {
     return (
       <View style={styles.container}>
         <Text>No search results found.</Text>
@@ -65,6 +66,7 @@ const SearchResultScreen = ({ route }) => {
         <Text style={styles.productTitle}>{item.name}</Text>
         <Text style={styles.productPrice}>{item.price} MAD</Text>
         <Text style={styles.productRating}>{item.rating}</Text>
+        
         {/* Handle description rendering */}
         {Array.isArray(item.description) ? (
           item.description.map((desc, index) => {

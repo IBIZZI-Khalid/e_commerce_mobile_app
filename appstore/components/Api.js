@@ -40,9 +40,9 @@ export const fetchcategories = async () => {
   }
 
 
-  export const fetchcategoryproducts = async () => { 
+  export const fetchcategoryproducts = async (category) => { 
     try{
-      const response = await apiClient.get(`/category_products/`);
+      const response = await apiClient.post(`/category_products/`,{ category });
       return response.data;                       
     } catch(error){
       console.log('api.js : error fetching the categories ', error.message);

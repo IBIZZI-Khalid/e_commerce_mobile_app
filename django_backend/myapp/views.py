@@ -85,7 +85,8 @@ def list_categories(request):
 @api_view(['GET' , 'POST'])
 def list_category_products(request):
     db = get_mongo_connection()
-    products = list(db.category_screen.find({}, {"_id": 1, "name": 1,"price" :1, "image": 1}))  
+    category = request.data.get('category') 
+    products = list(db.category_screen.find({'category' : category}, {"_id": 1, "name": 1,"price" :1, "image": 1}))  
     
     #converting object id to a string 
     for product in products:
@@ -263,6 +264,7 @@ class ChangePasswordView(APIView):
 def search_product(request):
     data = json.loads(request.body)
     product_name = data.get('searchQuery')
+    logger.debug(f"product_name in the backend : {product_name}")
     
     if not product_name:
         return Response({'error': 'Product name is required'}, status=400)
@@ -281,7 +283,7 @@ def search_product(request):
     jumia_products = jumia_products_collection.find_one({'name': regex})
     electroplanet_products = electroplanet_products_collection.find_one({'name': regex})
     
-    if (avito_products ,jumia_products,electroplanet_products):
+    if (avito_products ,jumia_products,electroplanet_products) is not None:
         avito_products['_id'] = str(avito_products['_id'])
         jumia_products['_id'] = str(jumia_products['_id'])
         electroplanet_products['_id'] = str(electroplanet_products['_id'])

@@ -23,7 +23,7 @@ const UseSearchHandler = () => {
       setLoading(false);
     }
   };
-  return { loading, error, searchResult, handleSearch };
+  return { handleSearch };
 
 };
 
