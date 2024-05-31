@@ -183,13 +183,13 @@ export const searchProduct = async(searchQuery)=>{
 };
 
 
-// apiClient.interceptors.request.use(async (config) => {
-//   const token = await AsyncStorage.getItem('@accessToken');
-//   if (token) {
-//     config.headers.Authorization = `Bearer ${token}`;
-//   }
-//   return config;
-// });
+apiClient.interceptors.request.use(async (config) => {
+  const token = await AsyncStorage.getItem('@accessToken');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
 
 export const fetchCart = async () => {
   try {
