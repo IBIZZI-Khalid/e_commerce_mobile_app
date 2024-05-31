@@ -56,4 +56,4 @@ class Cart(models.Model):
     items = models.JSONField(default=list)
 
     def __str__(self):
-        return f"Cart of {self.user.username}"
+        return f"{self.user.username}`s Cart"

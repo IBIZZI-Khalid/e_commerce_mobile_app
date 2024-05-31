@@ -214,6 +214,8 @@ const UserProfile =({navigation})=> {
           <Text>Email: {profile.user.email}</Text>
           <Text>Bio: {profile.bio}</Text>
           <Button title="Edit Details" onPress={() => navigation.navigate('EditAccountDetails')} />
+          <Button title="Home" onPress={() => navigation.navigate('Main')} />
+
         </View>
       ) : (
         

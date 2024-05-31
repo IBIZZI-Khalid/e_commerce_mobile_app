@@ -5,7 +5,7 @@ import { StyleSheet,
     TextInput,TouchableOpacity,
     ScrollView, 
     Platform} from 'react-native';
-import { fetchProducts , fetchcategories } from './Api';
+import { fetchProducts , fetchcategories } from './Api.js';
 import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Path } from 'react-native-svg';
 import { useFonts } from 'expo-font';
@@ -133,6 +133,8 @@ const Mainpage = () => {
     fetchData();
   }, []); // Empty dependency array means this runs once when the component mounts
   
+
+  
   useEffect(() => {
     const fetchCategoriesData = async () => {
       try {
@@ -159,6 +161,8 @@ const Mainpage = () => {
       console.log('No search results found');
     }
   }, [handleSearch, searchQuery, navigation]);
+
+
 
   const renderItem = useCallback(({ item, index }) => {
     const colors = ['rgba(0, 0, 0, 0.5)', 'rgba(0, 60, 180, 0.4)', 'rgba(108, 0, 0, 0.7)', 'rgba(128, 99, 195, 0.4)'];

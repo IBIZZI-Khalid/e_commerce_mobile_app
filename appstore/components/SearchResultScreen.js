@@ -9,40 +9,32 @@ const SearchResultScreen = ({ route }) => {
   const { searchResult } = route.params;
   const navigation = useNavigation();
   const[ cart , setCart ] =useState([]);
+  const [loading, setLoading] = useState(true);
+
   console.log('Received search result in SearchResultScreen:', searchResult);
 
-  let [fontsLoaded] = useFonts({ 'CustomFont': require('../assets/fonts/Ubuntu-Regular.ttf'), });
+    let [fontsLoaded] = useFonts({ 
+      'CustomFont': require('../assets/fonts/Ubuntu-Regular.ttf'), 
+    });
+    if (!fontsLoaded) {
+      return null;
+    }
 
-
+    
   useEffect(() => {
     const loadCart = async () => {
       try {
         const cartData = await fetchCart();
-        setCart(cartData.items);
+        setCart(cartData.items || [] );
       } catch (error) {
-        console.log('Error loading cart', error);
+        console.error("Failed to fetch cart data", error);
+      } finally {
+        setLoading(false);
       }
     };
 
     loadCart();
   }, []);
-
-  //function to handle adding a product to the cart 
-  const addToCart = async (product) => {
-    const updatedCart = [...cart , product];
-    setCart(updatedCart);
-    try{
-      await updateCart(updatedCart);
-    }catch(error){
-      console.log('Error updating cart', error);
-    }
-  };
-
-    if (!fontsLoaded) {
-      return null;
-    }
-
-
   // Handle case when there are no search results
   if (!searchResult || Object.keys(searchResult).length === 0) {
     return (
@@ -51,12 +43,22 @@ const SearchResultScreen = ({ route }) => {
       </View>
     );
   };
-
   //prepare the datasection
   const sections = Object.keys(searchResult).map(collection => ({
     title: collection,
     data: searchResult[collection] === 'No result found' ? [] : [searchResult[collection]]
   }));
+  
+  const addToCart = async (item) => {
+      try {
+        const newCart = [...cart, item];
+        setCart(newCart);
+        await updateCart(newCart);
+      } catch (error) {
+        console.error("Failed to update cart", error);
+      }
+    };
+  
 
   // Function to render each item
   const renderItem = ({ item }) => (
