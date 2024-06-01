@@ -6,7 +6,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // const BASE_URL = 'http://localhost:8000/';
 // const BASE_URL = 'http://192.168.11.241:8000/';
 // const BASE_URL = 'http://192.168.11.69:8000/'
-// const BASE_URL = 'http://192.168.100.150:8000/'
+// const BASE_URL = 'http://192.168.175.213:8000/'
 const BASE_URL = 'http://192.168.0.100:8000/';
 
 const apiClient = axios.create({
@@ -43,6 +43,18 @@ export const fetchcategories = async () => {
   export const fetchcategoryproducts = async (category) => { 
     try{
       const response = await apiClient.post(`/category_products/`,{ category });
+      return response.data;                       
+    } catch(error){
+      console.log('api.js : error fetching the categories ', error.message);
+      throw error; 
+    };
+  }
+
+  export const fetch_trending_products = async () => { 
+    try{
+      const response = await apiClient.get(`/trending_products/`);
+      // log the response :
+      console.log('api.js : response from fetch_trending_products : ', response.data);
       return response.data;                       
     } catch(error){
       console.log('api.js : error fetching the categories ', error.message);
@@ -183,28 +195,43 @@ export const searchProduct = async(searchQuery)=>{
 };
 
 
-apiClient.interceptors.request.use(async (config) => {
-  const token = await AsyncStorage.getItem('@accessToken');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
+// apiClient.interceptors.request.use(async (config) => {
+//   const token = await AsyncStorage.getItem('@accessToken');
+//   if (token) {
+//     config.headers.Authorization = `Bearer ${token}`;
+//   }
+//   return config;
+// });
 
 export const fetchCart = async () => {
   try {
-    const response = await apiClient.get('/cart/');
-    return response.data;
+    const token = await AsyncStorage.getItem('@accessToken');
+    const response = await apiClient.get('/cart/',{
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  }
+    );
+    return response.data[0];
   } catch (error) {
     throw error;
   }
 };
 
-export const updateCart = async (cart) => {
+export const updateCart = async (cartId, cart) => {
   try {
-    const response = await apiClient.put('/cart/', { items: cart });
+    const token = await AsyncStorage.getItem('@accessToken');
+    const response = await apiClient.put(`/cart/update-cart/`,
+      { items: cart },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
     return response.data;
   } catch (error) {
-    throw error;
+    throw ('shit',error);
   }
 };

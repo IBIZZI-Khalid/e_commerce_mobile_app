@@ -141,19 +141,18 @@ export default function App() {
 
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Home">
+      <Stack.Navigator initialRouteName="Main">
         <Stack.Screen name="Main" component={TabNavigator} options={{ headerShown: false }} />
-        {/* <Stack.Screen name="Home" component={Mainpage} options={{ headerShown: false }} /> */}
         <Stack.Screen name="Account" component={AccountNavigator} options={{ headerShown: false }} />
-        <Stack.Screen name="SearchResultScreen" component={SearchResultScreen}  />
+        <Stack.Screen name="SearchResultScreen" component={SearchResultScreen} />
         <Stack.Screen name="CartScreen" component={CartScreen} />
         <Stack.Screen name="CategoryScreen" component={CategoryScreen} />
-        
+        {/* <Stack.Screen name="Login" component={LoginScreen} />
+        <Stack.Screen name="Signup" component={SignupScreen} /> */}
       </Stack.Navigator>
     </NavigationContainer>
   );
 }
-
 
 const styles = StyleSheet.create({
   tabNavigator:{

@@ -43,4 +43,5 @@ class UserProfileSerializer(ModelSerializer):
 class CartSerializer(serializers.ModelSerializer):
     class Meta:
         model = Cart
-        fields = '__all__'
+        fields = ['id', 'user', 'items']
+        read_only_fields = ['user']  # Ensure user field is read-only

@@ -50,14 +50,21 @@ const SearchResultScreen = ({ route }) => {
   }));
   
   const addToCart = async (item) => {
-      try {
-        const newCart = [...cart, item];
-        setCart(newCart);
-        await updateCart(newCart);
-      } catch (error) {
-        console.error("Failed to update cart", error);
+    try {
+
+      const itemExists = cart.some(cartItem => cartItem._id === item._id);
+      if (itemExists) {
+        console.warn('Item already exists in the cart');
+        return;
       }
-    };
+      const newCart = [...cart, item];
+      setCart(newCart);
+      const cartId = item._id;
+      await updateCart(cartId, newCart);
+    } catch (error) {
+      console.error("Failed to update cart", error);
+    }
+  };
   
 
   // Function to render each item

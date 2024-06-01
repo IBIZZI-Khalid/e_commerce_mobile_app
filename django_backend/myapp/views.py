@@ -93,6 +93,15 @@ def list_category_products(request):
         product["_id"] = str(product["_id"])
     return Response({'category_products': products})
 
+@api_view(['GET'])
+def list_trending_products(request):
+    db = get_mongo_connection()
+    products = list(db.category_screen.find({'class' : 'trending'}, {"_id": 1, "name": 1,"price" :1, "image": 1}))  
+    
+    #converting object id to a string 
+    for product in products:
+        product["_id"] = str(product["_id"])
+    return Response({'trending_products': products})
 
 @api_view(['POST'])
 def add_mongo_product(request):
@@ -326,12 +335,46 @@ def search_product(request):
             return Response({'status': 'fail', 'message': 'Failed to save data to MongoDB'}, status=500)
 
 
-class  CartViewSet(viewsets.ModelViewSet):
+
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from rest_framework import status
+import logging
+
+logger = logging.getLogger(__name__)
+
+class CartViewSet(viewsets.ModelViewSet):
     serializer_class = CartSerializer
     permission_classes = [IsAuthenticated]
 
+
+    # Override the get_queryset method to filter carts by the logged-in user
     def get_queryset(self):
         return Cart.objects.filter(user=self.request.user)
-
+    
+    
+    # Override the perform_create method to associate the cart with the logged-in user
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+
+    # Define a custom action for updating the cart
+    @action(detail=False, methods=['put'], url_path='update-cart')
+    def update_cart(self, request):
+        logger.debug('Received PUT request with data: %s', request.data)
+        instance, created = Cart.objects.get_or_create(user=self.request.user)  # Get or create the cart for the logged-in user
+        if not instance:
+            return Response({"error": "Cart not found for the user"}, status=status.HTTP_404_NOT_FOUND)
+        
+        # Serialize the instance with the provided data
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        # Save the updated cart
+        self.perform_update(serializer)
+        return Response(serializer.data)
+    
+
+    # Override the perform_update method to ensure the user is correctly set
+    def perform_update(self, serializer):
+        serializer.save(user=self.request.user)
+

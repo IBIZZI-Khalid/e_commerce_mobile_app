@@ -20,6 +20,7 @@ ALLOWED_HOSTS = [   'localhost',
                     '192.168.11.241',
                     '192.168.11.69',
                     '192.168.100.109'
+                    '192.168.175.213',
                 ]
 CORS_ALLOW_ALL_ORIGINS = True
 
@@ -37,6 +38,8 @@ CORS_ALLOWED_ORIGINS = [
     "http://192.168.11.241",
     'htpp://192.168.11.69:8081',
     "http://192.168.11.69",
+    # 'http://192.168.175.213:8000'
+    # 'http://192.168.175.213'
 
 ]
 CORS_ALLOW_CREDENTIALS = True
@@ -66,7 +69,23 @@ CSRF_TRUSTED_ORIGINS = [
     'http://127.0.0.1:8081',
     'http://192.168.11.69:8081',
      "http://192.168.100.109:8081",
+     'http://192.168.175.213:8000/',
+    "http://192.168.0.100:8081", 
+
 ]
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'DEBUG',
+    },
+}
 
 MONGODB_DATABASE = {
     'name': 'products_databse',        

@@ -5,45 +5,13 @@ import { StyleSheet,
     TextInput,TouchableOpacity,
     ScrollView, 
     Platform} from 'react-native';
-import { fetchProducts , fetchcategories } from './Api.js';
+import { fetchProducts , fetchcategories ,fetch_trending_products} from './Api.js';
 import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Path } from 'react-native-svg';
 import { useFonts } from 'expo-font';
 import UseSearchHandler from './Search.js';
 import { useNavigation } from '@react-navigation/native';
-
-const categories = ['Action', 'Family', 'Puzzle', 'Adventure', 'Racing', 'Education', 'Others'];
-const featured = [
-  {
-      id: 1,
-      title: 'Zooba',
-      image: require('../assets/Rappi.jpeg'),
-      downloads: '200k',
-      stars: 4
-  },
-  {
-      id: 2,
-      title: 'Subway Surfer',
-      image: require('../assets/Rappi.jpeg'),
-      downloads: '5M',
-      stars: 4
-  },
-  {
-      id: 3,
-      title: 'Free Fire',
-      image: require('../assets/Rappi.jpeg'),
-      downloads: '100M',
-      stars: 3
-  },
-  
-  {
-      id: 4,
-      title: "Alto's Adventure",
-      image: require('../assets/Rappi.jpeg'),
-      downloads: '20k',
-      stars: 4
-  },
-]
+import ModalComponent from './Modal.js';
 
 
 const Wave = memo(() => (
@@ -109,14 +77,22 @@ const SearchBar = ({ searchQuery, setSearchQuery }) => {
 
 const Mainpage = () => {
   const { handleSearch } = UseSearchHandler();
-
   const [products, setProducts] = useState([]);
+  const [trendingproducts, setTrendingProducts] = useState([]);
   const [categories, setcategories] = useState([]);
-
   const [loadingProducts, setLoadingProducts] = useState(true);
   const [productsError, setProductsError] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [modalVisible, setModalVisible] = useState(true);
+
+
   let [fontsLoaded] = useFonts({ 'CustomFont': require('../assets/fonts/Ubuntu-Regular.ttf'), });
+  const navigation = useNavigation();
+  
+  useEffect(() => {
+    setModalVisible(true);
+  }, []);
+  
 
   useEffect(() => {
     const fetchData = async () => {
@@ -133,7 +109,6 @@ const Mainpage = () => {
     fetchData();
   }, []); // Empty dependency array means this runs once when the component mounts
   
-
   
   useEffect(() => {
     const fetchCategoriesData = async () => {
@@ -151,7 +126,29 @@ const Mainpage = () => {
   }, []);
 
 
-  const navigation = useNavigation();
+  useEffect(() => {
+    const fetchtrendingData = async () => {
+      try {
+        const response = await fetch_trending_products();
+        // log the response :
+        console.log('mainpage response : ',response);
+
+        setTrendingProducts(response.trending_products);
+      } catch (error) {
+        console.error('Error fetching products:', error);
+        setProductsError(error);
+      } finally {
+        setLoadingProducts(false);
+      }
+    };
+    fetchtrendingData();
+  }, []); 
+
+
+  const handleCloseModal = () => {
+    setModalVisible(false);
+  };
+  
   const handleSearchButtonPress = useCallback(async () => {
     const result = await handleSearch(searchQuery);
     if(result){
@@ -176,6 +173,11 @@ const Mainpage = () => {
     );
   },[]);
 
+
+
+
+
+
   if (loadingProducts) {
     return (
       <View style={styles.loadingContainer}>
@@ -195,9 +197,17 @@ const Mainpage = () => {
   if (!fontsLoaded) {
     return null;
   }
+
+
+
+
+
+
+
   return (
     <ScrollView vertical showsVerticalScrollIndicato={false} >
     <View style={styles.gradientContainer}>
+      <ModalComponent visible={modalVisible} onClose={handleCloseModal} />
       <LinearGradient
         colors={['black', '#531889']}
         style={styles.LinearGradient}
@@ -255,7 +265,7 @@ const Mainpage = () => {
             ))}
         </ScrollView>  
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            {products.map((item, index) => (
+            {trendingproducts.map((item, index) => (
               <TouchableOpacity
                 key={index}
                 onPress={() => navigation.navigate('CategoryScreen', { category: item.name})}

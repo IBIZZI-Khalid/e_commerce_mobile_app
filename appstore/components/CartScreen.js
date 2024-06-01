@@ -1,36 +1,44 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, Image, StyleSheet, TouchableOpacity } from 'react-native';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { View, Text, FlatList, Image, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { useNavigation, useIsFocused } from '@react-navigation/native';
 import { fetchCart, updateCart } from './Api';
 
 const CartScreen = () => {
   const [cart, setCart] = useState([]);
   const [loading, setLoading] = useState(true);
-  const navigation = useNavigation();
-  const route = useRoute();
+  const [error, setError] = useState(null);
+  const isFocused = useIsFocused();
 
   useEffect(() => {
     const loadCart = async () => {
-      if (route.params?.cart) {
-        setCart(route.params.cart);
-      } else {
-        try {
-          const cartData = await fetchCart();
-          setCart(cartData.items);
-        } catch (error) {
-          console.error("Failed to fetch cart data", error);
-        }
+      try {
+        const cartData = await fetchCart();
+        setCart(cartData.items); // Ensure this line correctly sets the items
+      } catch (error) {
+        setError("Failed to fetch cart data");
+        console.error("Failed to fetch cart data", error);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
-    loadCart();
-  }, [route.params?.cart]);
+    if (isFocused) {
+      loadCart();
+    }
+  }, [isFocused]);
 
   if (loading) {
     return (
       <View style={styles.container}>
-        <Text>Loading cart...</Text>
+        <ActivityIndicator size="large" color="#0000ff" />
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.container}>
+        <Text>{error}</Text>
       </View>
     );
   }
@@ -59,8 +67,21 @@ const CartScreen = () => {
       <View style={styles.cartItemInfo}>
         <Text style={styles.cartItemTitle}>{item.name}</Text>
         <Text style={styles.cartItemPrice}>{item.price} MAD</Text>
+        <TouchableOpacity style={styles.ComparePress} 
+        onPress={async() =>  {
+          const result = await handleSearch(item.name);
+          console.log('Search result from category screen:', result);
+          if(result) {
+            navigation.navigate('SearchResultScreen', { searchResult: result });
+            console.log('Navigating to SearchResultScreen with data:', result);
+          } else {
+            console.log('No search results found');
+          }
+        }}>
+          <Text style={styles.ButtonText}>Start Comparing !</Text>
+        </TouchableOpacity>
         <TouchableOpacity style={styles.removeButton} onPress={() => removeFromCart(item)}>
-          <Text style={styles.removeButtonText}>Remove</Text>
+          <Text style={styles.ButtonText}>Remove</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -106,10 +127,16 @@ const styles = StyleSheet.create({
   removeButton: {
     marginTop: 10,
     padding: 10,
-    backgroundColor: 'red',
+    backgroundColor: 'rgba(237, 56, 56, 0.8)',
     borderRadius: 5,
   },
-  removeButtonText: {
+  ComparePress:{
+    marginTop: 10,
+    padding: 10,
+    backgroundColor: 'rgba(0, 138, 168, 1)',
+    borderRadius: 5,
+  },
+  ButtonText: {
     color: 'white',
     textAlign: 'center',
   },

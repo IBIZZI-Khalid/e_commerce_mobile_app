@@ -59,7 +59,7 @@ const CategoryScreen = ({ route }) => {
                     console.log('No search results found');
                   }
                 }}
-              >
+                >
 
                   <View style={styles.itemContainer}>
                     <View>

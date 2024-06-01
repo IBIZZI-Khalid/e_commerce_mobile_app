@@ -11,6 +11,7 @@ from .views import (
     add_mongo_product ,
     search_product,
 list_category_products,
+list_trending_products,
     LoginView,
     SignupView,
     ChangePasswordView,
@@ -37,6 +38,7 @@ urlpatterns = [
     path('mongo-products/', list_mongo_products, name='list_mongo_products'),
     path('categories/', list_categories, name='list_categories'),
     path('category_products/', list_category_products, name='list_categories'),
+    path('trending_products/', list_trending_products, name='list_trendings'),
 
     path('add-mongo-product/', add_mongo_product, name='add_mongo_product'),
     path('search/', search_product,name='search_product' ),
