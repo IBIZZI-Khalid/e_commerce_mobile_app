@@ -29,13 +29,14 @@ function TabNavigator() {
   return (
     <Tab.Navigator 
       tabBar={(props) => <MyTabBar {...props} />} 
-      screenOptions={{  
-        header: () => <Header />,
-      }}
+      // screenOptions={{  
+      //   header: () => <Header />,
+      // }}
       style={styles.tabNavigator}
     > 
-      <Tab.Screen name="Home" component={Mainpage}
+      <Tab.Screen name="Home" component={Mainpage} 
         options={{
+          headerShown: false,
           tabBarIcon: ({ focused }) => (
             <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
               <Image 
@@ -44,10 +45,10 @@ function TabNavigator() {
                 style={{
                   width: 25,
                   height: 25,
-                  tintColor: focused ? '#A77EFB' : '#4d3b75',
+                  tintColor: focused? '#A77EFB' : '#4d3b75',
                 }}
               />
-              <Text style={{ color: focused ? '#4d3b75' : '#20948B', fontSize: 12 }}>
+              <Text style={{ color: focused? '#4d3b75' : '#20948B', fontSize: 12 }}>
                 HOME
               </Text>
             </View>
@@ -142,6 +143,7 @@ export default function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Main">
+        
         <Stack.Screen name="Main" component={TabNavigator} options={{ headerShown: false }} />
         <Stack.Screen name="Account" component={AccountNavigator} options={{ headerShown: false }} />
         <Stack.Screen name="SearchResultScreen" component={SearchResultScreen} />

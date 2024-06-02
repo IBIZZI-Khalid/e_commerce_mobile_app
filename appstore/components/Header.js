@@ -17,7 +17,7 @@ const styles = StyleSheet.create({
       marginTop: Platform.OS === 'ios' ? 40:30, // iOS has a different status bar height than Android
       height : Platform.OS === 'ios'? 80:60 ,// Set the height of the header container for iOS and add extra space for the status bar
       justifyContent: 'space-between', // Add space between elements
-      backgroundColor: '#531889',
+      backgroundColor: 'transparent',
       padding:10,
     },
     searchInput: {

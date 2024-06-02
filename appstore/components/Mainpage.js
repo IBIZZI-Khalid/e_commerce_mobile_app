@@ -12,7 +12,8 @@ import { useFonts } from 'expo-font';
 import UseSearchHandler from './Search.js';
 import { useNavigation } from '@react-navigation/native';
 import ModalComponent from './Modal.js';
-
+import Header from './Header.js';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Wave = memo(() => (
   <View>
@@ -84,15 +85,25 @@ const Mainpage = () => {
   const [productsError, setProductsError] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [modalVisible, setModalVisible] = useState(true);
-
+ const[reversedtrendingproducts,setrevertrendingproducts]=useState([]);
 
   let [fontsLoaded] = useFonts({ 'CustomFont': require('../assets/fonts/Ubuntu-Regular.ttf'), });
   const navigation = useNavigation();
   
   useEffect(() => {
-    setModalVisible(true);
+    const checkModalShown = async () => {
+      try {
+        const value = await AsyncStorage.getItem('modalShown');
+        if (value === null) {
+          setModalVisible(true);
+          await AsyncStorage.setItem('modalShown', 'true');
+        }
+      } catch (error) {
+        console.error('Error checking modal status:', error);
+      }
+    };
+    checkModalShown();
   }, []);
-  
 
   useEffect(() => {
     const fetchData = async () => {
@@ -134,6 +145,8 @@ const Mainpage = () => {
         console.log('mainpage response : ',response);
 
         setTrendingProducts(response.trending_products);
+        setrevertrendingproducts([...response.trending_products].reverse());
+
       } catch (error) {
         console.error('Error fetching products:', error);
         setProductsError(error);
@@ -207,13 +220,15 @@ const Mainpage = () => {
   return (
     <ScrollView vertical showsVerticalScrollIndicato={false} >
     <View style={styles.gradientContainer}>
+    
       <ModalComponent visible={modalVisible} onClose={handleCloseModal} />
       <LinearGradient
         colors={['black', '#531889']}
         style={styles.LinearGradient}
-        start={{ x: 0, y: 0.35 }}
+        start={{ x: 0, y: 0.3 }}
         end={{ x: 1, y: 0 }}
       >
+        <Header />
         <View style={styles.top_div}>
         
           {/* attention to the big phrases */}
@@ -255,7 +270,7 @@ const Mainpage = () => {
         
         <Text style={styles.Categoriestext}>Or Check The Trending Products</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            {products.map((item, index) => (
+            {reversedtrendingproducts.map((item, index) => (
               <TouchableOpacity
                 key={index}
                 onPress={() => navigation.navigate('CategoryScreen', { category: item.name})}

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Modal, View, Text, Button, StyleSheet, Image } from 'react-native';
+import { Modal, View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import 'nativewind';
@@ -30,18 +30,16 @@ const ModalComponent = ({ visible, onClose }) => {
               Sign Up or Log In For More Features!
             </Text>
             <View style={styles.buttonContainer}>
-              <Button
-                title="Sign Up"
+              <TouchableOpacity
                 onPress={() => navigation.navigate('Account')}
                 style={styles.signUpButton}
-              />
-              <Button
-                title="Log In"
-                onPress={() => navigation.navigate('Accout')}
-                style={styles.loginButton}
-              />
+              >
+                <Text style={styles.buttonText}>Manage account !</Text>
+              </TouchableOpacity>
             </View>
-            <Button title="Close" onPress={onClose} style={styles.closeButton} />
+            <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+              <Text style={styles.buttonText}>Close</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </View>
@@ -57,7 +55,7 @@ const styles = StyleSheet.create({
     // ... (existing styles)
   },
   modalView: {
-    backgroundColor: 'rgba(255, 255, 255, 0.94)',
+    backgroundColor: 'rgba(255, 255, 255, 0.98)',
     flexDirection: 'column',
     padding: 10,
   },
@@ -70,31 +68,39 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
   },
   buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100%',
-    marginBottom: 10,
+    // justifyContent: 'space-between',
+    // backgroundColor: 'rgba(122, 17, 195, 0.66)', 
+    // width: 200,
+    // marginBottom: 10,
   },
   signUpButton: {
-    backgroundColor: '#4285F4', // Primary blue color
-    color: '#fff', // White text color
-    borderRadius: 10,
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-  },
-  loginButton: {
-    backgroundColor: '#ccc', // Light gray color
-    color: '#000', // Black text color
-    borderRadius: 10,
+    backgroundColor: 'rgba(122, 17, 195, 0.66)', // Primary blue color
+    borderRadius: 50,
     paddingHorizontal: 20,
     paddingVertical: 12,
   },
   closeButton: {
-    backgroundColor: '#f00', // Red color
+    width: 200,
+    borderRadius:50,
+    fontSize: 15,
+    marginTop:10,
+
+    backgroundColor:'rgba(40, 13, 58, 0.76)',
+    padding:10,
+    shadowColor : 'rgba(219, 170, 255, 1)',
+    shadowOffset   :{
+      width : 0 ,
+      height : 10 , 
+    },
+    shadowOpacity : 0.3,
+    shadowRadius : 3.5,
+    elevation : 5 ,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  buttonText: {
     color: '#fff', // White text color
-    borderRadius: 10,
-    paddingHorizontal: 20,
-    paddingVertical: 12,
+    textAlign: 'center',
   },
 });
 

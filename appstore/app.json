@@ -5,7 +5,7 @@
     "slug": "appstore",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/image.png",
+    "icon": "./assets/versus_logo.jpeg",
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/splash.png",

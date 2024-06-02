@@ -59,14 +59,7 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     height: 90,
     overflow: 'hidden', // Ensure children don't overflow the rounded corners
-    shadowColor: 'rgba(219, 170, 255, 1)',
-    shadowOffset: {
-      width: 0,
-      height: 10,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 3.5,
-    elevation: 5,
+    
   },
   blurView: {
     flex: 1,
