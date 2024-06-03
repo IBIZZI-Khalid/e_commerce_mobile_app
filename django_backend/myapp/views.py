@@ -96,7 +96,7 @@ def list_category_products(request):
 @api_view(['GET'])
 def list_trending_products(request):
     db = get_mongo_connection()
-    products = list(db.category_screen.find({'class' : 'trending'}, {"_id": 1, "name": 1,"price" :1, "image": 1}))  
+    products = list(db.category_screen.find({'class' : 'trending'}, {"_id": 1, "name": 1,"price" :1, "image": 1,"source":1,"link":1}))  
     
     #converting object id to a string 
     for product in products:
@@ -268,53 +268,47 @@ class ChangePasswordView(APIView):
             return Response({'message': 'Password changed successfully'})
         return Response({'error': 'Wrong old password'}, status=400)
 
-# views.py
+# views.pyimport json
+from django.http import JsonResponse
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+import logging
+
+logger = logging.getLogger(__name__)
+
 @api_view(['POST'])
 def search_product(request):
     data = json.loads(request.body)
     product_name = data.get('searchQuery')
-    logger.debug(f"product_name in the backend : {product_name}")
-    
+    logger.debug(f"product_name in the backend: {product_name}")
+
     if not product_name:
         return Response({'error': 'Product name is required'}, status=400)
-    
+
     db = get_mongo_connection()
+    if not db:
+        logger.error("Failed to connect to MongoDB")
+        return Response({'error': 'Database connection failed'}, status=500)
+
+    products_collection = db.category_screen
     fake_product_collection = db.product_collection
-    avito_products_collection = db.avito_products_collection
-    jumia_products_collection = db.jumia_products_collection
-    electroplanet_products_collection=db.electroplanet_products_collection
-    # Check if the product already exists in the database
-    # existing_product = product_collection.find_one({'name': product_name})
-    # Use regex for partial matching
-    regex = {'$regex': product_name, '$options': 'i'}  # 'i' for case-insensitive
 
-    avito_products = avito_products_collection.find_one({'name': regex})
-    jumia_products = jumia_products_collection.find_one({'name': regex})
-    electroplanet_products = electroplanet_products_collection.find_one({'name': regex})
+    # Use MongoDB text search
+    text_query = {'$text': {'$search': product_name}}
+
+    sources = ['avito', 'jumia', 'electroplanet']
+    results = {}
     
-    if (avito_products ,jumia_products,electroplanet_products) is not None:
-        avito_products['_id'] = str(avito_products['_id'])
-        jumia_products['_id'] = str(jumia_products['_id'])
-        electroplanet_products['_id'] = str(electroplanet_products['_id'])
-        
-        results ={
-            'avito_products': avito_products if avito_products else 'No resluts from avito',
-            'jumia_products': jumia_products if jumia_products else 'No results from jumia',
-            'electroplanet_products': electroplanet_products if electroplanet_products else 'No results from electroplanet',
-        }
+    for source in sources:
+        products = list(products_collection.find({'source': source, **text_query}, 
+                      {"_id": 1, "name": 1, "price": 1, "image": 1, "source": 1, "link": 1}))
+        if products:
+            for product in products:
+                product["_id"] = str(product["_id"])
+            results[f'{source}_products'] = products
 
-        # Convert MongoDB ObjectIds to strings  
-        for key, product in results.items():
-            if isinstance(product, dict) and '_id' in product:
-                product['_id'] = str(product['_id'])
-
-        return Response({'status':'success' , 'data':results } , status = 200 )    
-
-    # if existing_product:
-    #     # Convert _id to a string before sending the response
-    #     existing_product['_id'] = str(existing_product['_id'])
-    #     return Response({'status': 'success', 'data': existing_product}, status=200)
-    
+    if results:
+        return Response({'status': 'success', 'data': results}, status=200)
     else:
         # Simulate fetching data from an external API
         fake_api_data = {
@@ -323,10 +317,9 @@ def search_product(request):
             'price': 99.99,
             'image': 'http://example.com/fake_image.png',
         }
-        
+
         # Save the fake data to MongoDB
         result = fake_product_collection.insert_one(fake_api_data)
-        
         if result.inserted_id:
             # Convert _id to a string before sending the response
             fake_api_data['_id'] = str(result.inserted_id)

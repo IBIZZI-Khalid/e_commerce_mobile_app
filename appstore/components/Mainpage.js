@@ -145,7 +145,7 @@ const Mainpage = () => {
         console.log('mainpage response : ',response);
 
         setTrendingProducts(response.trending_products);
-        setrevertrendingproducts([...response.trending_products].reverse());
+        setrevertrendingproducts([...response.trending_products].reverse());//the second row of trending data kaybdamn lekher dyal list 
 
       } catch (error) {
         console.error('Error fetching products:', error);
@@ -161,18 +161,23 @@ const Mainpage = () => {
   const handleCloseModal = () => {
     setModalVisible(false);
   };
-  
   const handleSearchButtonPress = useCallback(async () => {
-    const result = await handleSearch(searchQuery);
-    if(result){
-    navigation.navigate('SearchResultScreen', { searchResult: result });
-    console.log('Navigating from mainpage to SearchResultScreen with data:', result);
-    }else{
-      console.log('No search results found');
+    try {
+      const result = await handleSearch(searchQuery);
+      console.log('Received search result:', result);
+  
+      // Ensure the result is properly resolved and passed
+      if (result && Object.keys(result).length > 0) {
+        navigation.navigate('SearchResultScreen', { searchResult: result });
+        console.log('Navigating from mainpage to SearchResultScreen with data:', result);
+      } else {
+        console.log('No search results found');
+      }
+    } catch (error) {
+      console.error('Error while searching:', error);
     }
   }, [handleSearch, searchQuery, navigation]);
-
-
+  
 
   const renderItem = useCallback(({ item, index }) => {
     const colors = ['rgba(0, 0, 0, 0.5)', 'rgba(0, 60, 180, 0.4)', 'rgba(108, 0, 0, 0.7)', 'rgba(128, 99, 195, 0.4)'];
@@ -268,12 +273,22 @@ const Mainpage = () => {
             ))}
         </ScrollView>   
         
+
         <Text style={styles.Categoriestext}>Or Check The Trending Products</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             {reversedtrendingproducts.map((item, index) => (
               <TouchableOpacity
                 key={index}
-                onPress={() => navigation.navigate('CategoryScreen', { category: item.name})}
+                onPress={async () => {
+                  const result = await handleSearch(item.name);
+                  if(result){
+                    navigation.navigate('SearchResultScreen', { searchResult: result });
+                    console.log('Navigating from mainpage to SearchResultScreen with data:', result);
+                    }else{
+                      console.log('No search results found');
+                    }
+                }}
+                  
               >
                 <GameCard game={item} />
               </TouchableOpacity>
