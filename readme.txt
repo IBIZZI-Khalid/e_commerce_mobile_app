@@ -1,5 +1,5 @@
 to run the frontend part of the app  we gotta navigate to the fe directory (C:\Users\hp\Desktop\mobile_app_store\appstore) and run : 
-npx expo start --tunnel
+npx expo start 
 
 to clear app cash
 expo r -c 
@@ -12,5 +12,3 @@ each time u connect to the wifi change the ipv4 + deactivate the firwall for the
 
 gotta  either disable CSRF protection (not recommended for production) or include the CSRF token in your axios request./django_backend
 
-
-To fix this, you should adjust either the Django serializer to include these fields directly or modify the React Native component to correctly navigate through the nested data structure.
